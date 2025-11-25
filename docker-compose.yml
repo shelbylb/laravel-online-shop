@@ -1,0 +1,32 @@
+services:
+  web:
+    image: nginx
+    ports:
+      - 80:80
+    volumes:
+      - ./Docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./:/var/www/html
+    depends_on:
+      - php-fpm
+
+  php-fpm:
+    container_name: php-fpm
+    build: ./Docker/php
+    volumes:
+      # Основной код приложения
+      - ./:/var/www/html
+
+  postgres:
+    image: postgres:17.6
+    container_name: my_db
+    volumes:
+      - ./Docker/postgres/data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    ports:
+      - 5432:5432
+
+
+
