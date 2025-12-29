@@ -27,7 +27,7 @@ class RegisterRequest extends FormRequest
                 'max:255',
                 Rule::unique('users')->whereNull('deleted_at') // Игнорируем удаленных
             ],
-            'password'   => ['required', 'string', 'min:8', 'confirmed'],
+            'password'   => ['required', 'string', 'min:8', 'confirmed'], // confirmed проверяет пароль на совпадение в поле проверки пароля
         ];
     }
 
