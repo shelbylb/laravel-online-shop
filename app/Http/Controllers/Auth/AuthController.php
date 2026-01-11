@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\DTO\RegisterDto;
+use App\DTOs\Auth\RegisterDto;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\RegisterRequest;
-use App\Service\UserService;
+use App\Http\Requests\Auth\RegisterRequest;
+use App\Services\Auth\UserService;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -13,7 +13,7 @@ use Illuminate\Http\RedirectResponse;
 class AuthController extends Controller
 {
     public function __construct(
-        private readonly UserService $service
+        private readonly UserService $userService
     ) {}
 
     /** Показ формы регистрации */

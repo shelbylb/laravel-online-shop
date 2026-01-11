@@ -1,14 +1,13 @@
 <?php
-namespace App\DTOs;
+namespace App\DTOs\Auth;
 
-use Spatie\LaravelData\Data;
 use App\Http\Requests\Auth\RegisterRequest;
 
-class RegisterDto extends Data
+class RegisterDto
 {
     public function __construct(
         public string $first_name,
-        public string $last_name,
+        public ?string $last_name,
         public string $email,
         public ?string $phone,
         public string $password,
