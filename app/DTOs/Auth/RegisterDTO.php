@@ -3,7 +3,7 @@ namespace App\DTOs\Auth;
 
 use App\Http\Requests\Auth\RegisterRequest;
 
-class RegisterDto
+class RegisterDTO
 {
     public function __construct(
         public string $first_name,

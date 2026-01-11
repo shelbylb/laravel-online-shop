@@ -1,13 +1,13 @@
 <?php
 
 namespace App\Services\Auth;
-use App\DTOs\Auth\RegisterDto;
+use App\DTOs\Auth\RegisterDTO;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
 class UserService
 {
-    public function register(RegisterDto $dto): User
+    public function register(RegisterDTO $dto): User
     {
         $user = new User();
         $user->first_name = $dto->first_name;
