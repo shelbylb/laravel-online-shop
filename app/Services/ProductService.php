@@ -10,6 +10,11 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class ProductService
 {
+
+    public function getProductPageData(Product $product): array
+    {
+        return $product;
+    }
     private const array PER_PAGE_OPTIONS = [10, 25, 50, 100];
 
     /**

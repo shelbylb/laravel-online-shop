@@ -28,9 +28,12 @@ class ProductController extends Controller
         return view('products.index', compact('products', 'dto', 'maxPrice'));
     }
 
-    public function show(Product $product)
+    public function show(Product $product): Factory|View
     {
-        // Страница товара — отдельный урок, здесь оставляем как есть
-        return view('products.show', compact('product'));
+        $product = $productService->getProductPageData($product);
+
+        return view('products.show', [
+            'product' => $product,
+        ]);
     }
 }
