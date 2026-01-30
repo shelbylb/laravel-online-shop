@@ -4,7 +4,7 @@
 @php($maxPrice = $dto->max_price ?? '')
 @php($inStock = $dto->in_stock ?? false)
 @php($sort = $dto->sort ?? 'new')
-@php($maxProductPricePlaceholder = $maxProductPrice ? ('до ' . $maxProductPrice) : 'максимальная цена товара')
+@php($maxProductPricePlaceholder = $maxPrice ? ('до ' . $maxPrice) : 'максимальная цена товара')
 
 @extends('layouts.app')
 
