@@ -25,6 +25,7 @@ RUN apt-get update && apt-get install -y \
         pdo_pgsql \
         exif \
         sockets \
+        bcmath \
     && pecl install xdebug \
     && docker-php-ext-enable xdebug \
     && apt-get clean \

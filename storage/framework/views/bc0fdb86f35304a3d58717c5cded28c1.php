@@ -21,6 +21,11 @@
             </div>
         <?php endif; ?>
 
+        <!-- Контейнер для всплывающих уведомлений -->
+        <div id="notification-container" class="position-fixed top-0 end-0 p-3" style="z-index: 1050;">
+            <!-- Уведомления будут добавляться сюда через JavaScript -->
+        </div>
+
         <form method="GET" action="<?php echo e(route('products.index')); ?>" class="card card-body mb-3">
             <div class="row g-2 align-items-end">
                 <div class="col-12 col-lg-4">
@@ -120,15 +125,42 @@
                             <h5 class="card-title"><?php echo e($product->name); ?></h5>
                             <p class="fw-semibold mb-3"><?php echo e(number_format($product->price, 0, ',', ' ')); ?> ₽</p>
 
+                            <?php if($product->stock > 0): ?>
+                                <span class="badge bg-success mb-2">
+                                В наличии: <?php echo e($product->stock); ?> шт.
+                                </span>
+                            <?php else: ?>
+                                <span class="badge bg-danger mb-2">Нет в наличии</span>
+                            <?php endif; ?>
+
+
                             <?php ($detailsUrl = Route::has('products.show') ? route('products.show', $product) : '#'); ?>
-                            <a href="<?php echo e($detailsUrl); ?>" class="btn btn-outline-primary mt-auto">
-                                Подробнее
-                            </a>
+
+                            <div class="d-flex gap-2 mt-auto">
+                                <a href="<?php echo e($detailsUrl); ?>" class="btn btn-outline-primary flex-fill">
+                                    Подробнее
+                                </a>
+
+                                <form method="POST"
+                                      action="<?php echo e(route('cart.items.store', $product)); ?>"
+                                      data-ajax-cart="1"
+                                      class="flex-fill"
+                                      data-product-name="<?php echo e($product->name); ?>">
+                                    <?php echo csrf_field(); ?>
+                                    <input type="hidden" name="quantity" value="1">
+                                    <button type="submit" class="btn <?php echo e($product->stock > 0 ? 'btn-primary' : 'btn-secondary'); ?> w-100"
+                                            <?php if($product->stock === 0): ?> disabled <?php endif; ?>>
+                                        В корзину
+                                    </button>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
-                <p>По заданным условиям товары не найдены.</p>
+                <div class="col-12">
+                    <p class="text-center text-muted py-5">По заданным условиям товары не найдены.</p>
+                </div>
             <?php endif; ?>
         </div>
 
@@ -138,5 +170,7 @@
         </div>
     </div>
 <?php $__env->stopSection(); ?>
+
+
 
 <?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /var/www/html/resources/views/products/index.blade.php ENDPATH**/ ?>

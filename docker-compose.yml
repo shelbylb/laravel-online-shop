@@ -11,10 +11,14 @@ services:
 
   php-fpm:
     container_name: php-fpm
-    build: ./Docker/php
+    build:
+      context: .
+      dockerfile: ./Docker/php/Dockerfile
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
-      - ./:/var/www/html
       - ./Docker/php/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
+      - ./:/var/www/html
 
   postgres:
     image: postgres:17.6

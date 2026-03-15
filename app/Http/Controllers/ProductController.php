@@ -6,6 +6,8 @@ use App\DTOs\ProductFilterDto;
 use App\Http\Requests\ProductFilterRequest;
 use App\Models\Product;
 use App\Services\ProductService;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 
 class ProductController extends Controller
 {
@@ -30,7 +32,7 @@ class ProductController extends Controller
 
     public function show(Product $product): Factory|View
     {
-        $product = $productService->getProductPageData($product);
+        $product = $this->productService->getProductPageData($product);
 
         return view('products.show', [
             'product' => $product,

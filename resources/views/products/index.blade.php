@@ -20,6 +20,11 @@
             </div>
         @endif
 
+        <!-- Контейнер для всплывающих уведомлений -->
+        <div id="notification-container" class="position-fixed top-0 end-0 p-3" style="z-index: 1050;">
+            <!-- Уведомления будут добавляться сюда через JavaScript -->
+        </div>
+
         <form method="GET" action="{{ route('products.index') }}" class="card card-body mb-3">
             <div class="row g-2 align-items-end">
                 <div class="col-12 col-lg-4">
@@ -119,15 +124,42 @@
                             <h5 class="card-title">{{ $product->name }}</h5>
                             <p class="fw-semibold mb-3">{{ number_format($product->price, 0, ',', ' ') }} ₽</p>
 
+                            @if($product->stock > 0)
+                                <span class="badge bg-success mb-2">
+                                В наличии: {{ $product->stock }} шт.
+                                </span>
+                            @else
+                                <span class="badge bg-danger mb-2">Нет в наличии</span>
+                            @endif
+
+
                             @php($detailsUrl = Route::has('products.show') ? route('products.show', $product) : '#')
-                            <a href="{{ $detailsUrl }}" class="btn btn-outline-primary mt-auto">
-                                Подробнее
-                            </a>
+
+                            <div class="d-flex gap-2 mt-auto">
+                                <a href="{{ $detailsUrl }}" class="btn btn-outline-primary flex-fill">
+                                    Подробнее
+                                </a>
+
+                                <form method="POST"
+                                      action="{{ route('cart.items.store', $product) }}"
+                                      data-ajax-cart="1"
+                                      class="flex-fill"
+                                      data-product-name="{{ $product->name }}">
+                                    @csrf
+                                    <input type="hidden" name="quantity" value="1">
+                                    <button type="submit" class="btn {{ $product->stock > 0 ? 'btn-primary' : 'btn-secondary' }} w-100"
+                                            @if($product->stock === 0) disabled @endif>
+                                        В корзину
+                                    </button>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
             @empty
-                <p>По заданным условиям товары не найдены.</p>
+                <div class="col-12">
+                    <p class="text-center text-muted py-5">По заданным условиям товары не найдены.</p>
+                </div>
             @endforelse
         </div>
 
@@ -136,3 +168,5 @@
         </div>
     </div>
 @endsection
+
+
