@@ -16,6 +16,7 @@ class CartController extends Controller
 
     public function index(): Factory|View
     {
+
         return view('cart.index', [
             'items' => $this->sessionCartService->getItems(),
             'totalQuantity' => $this->sessionCartService->getTotalQuantity(),
