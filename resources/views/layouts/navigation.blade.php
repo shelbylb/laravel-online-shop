@@ -20,6 +20,13 @@
                     <x-nav-link :href="route('products.index')" :active="request()->routeIs('products.index')">
                         {{ __('Каталог') }}
                     </x-nav-link>
+
+                    <!-- Ссылка на заказы (только для авторизованных) -->
+                    @auth
+                        <x-nav-link :href="route('orders.index')" :active="request()->routeIs('orders.*')">
+                            {{ __('Мои заказы') }}
+                        </x-nav-link>
+                    @endauth
                 </div>
             </div>
 
@@ -61,6 +68,11 @@
 
                     <x-slot name="content">
                         @auth
+                            <!-- Ссылка на заказы в выпадающем меню -->
+                            <x-dropdown-link :href="route('orders.index')">
+                                {{ __('Мои заказы') }}
+                            </x-dropdown-link>
+
                             <x-dropdown-link :href="route('profile.edit')">
                                 {{ __('Profile') }}
                             </x-dropdown-link>
@@ -98,7 +110,7 @@
         </div>
     </div>
 
-    <!-- Responsive Navigation Menu -->
+    <!-- Responsive Navigation Menu (мобильная версия) -->
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
@@ -109,6 +121,13 @@
             <x-responsive-nav-link :href="route('products.index')" :active="request()->routeIs('products.index')">
                 {{ __('Каталог') }}
             </x-responsive-nav-link>
+
+            <!-- Orders in mobile menu (только для авторизованных) -->
+            @auth
+                <x-responsive-nav-link :href="route('orders.index')" :active="request()->routeIs('orders.*')">
+                    {{ __('Мои заказы') }}
+                </x-responsive-nav-link>
+            @endauth
 
             <!-- Cart in mobile menu -->
             <x-responsive-nav-link :href="route('cart.index')" :active="request()->routeIs('cart.index')">
@@ -133,6 +152,11 @@
                 </div>
 
                 <div class="mt-3 space-y-1">
+                    <!-- Orders in mobile dropdown -->
+                    <x-responsive-nav-link :href="route('orders.index')">
+                        {{ __('Мои заказы') }}
+                    </x-responsive-nav-link>
+
                     <x-responsive-nav-link :href="route('profile.edit')">
                         {{ __('Profile') }}
                     </x-responsive-nav-link>

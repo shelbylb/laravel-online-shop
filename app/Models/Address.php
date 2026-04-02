@@ -5,10 +5,25 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+
 class Address extends Model
 {
-    /** @use HasFactory<\Database\Factories\AddressFactory> */
     use HasFactory, SoftDeletes;
+
+    /**
+     * Поля, разрешенные для массового присвоения
+     *
+     * @var array
+     */
+    protected $fillable = [
+        'user_id',
+        'country',
+        'city',
+        'street',
+        'house',
+        'apartment',
+        'is_default',
+    ];
 
     /**
      * Поля, которые должны быть преобразованы к определенным типам
@@ -57,8 +72,6 @@ class Address extends Model
 
         return implode(', ', $parts);
     }
-
-
 
     /**
      * Проверить, является ли адрес основным для пользователя
@@ -114,5 +127,4 @@ class Address extends Model
     {
         return $query->where('country', 'LIKE', "%{$country}%");
     }
-
 }
