@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
     {
         // Определяем порядок сидров - сначала те, от которых зависят другие
         $this->call([
+            RoleSeeder::class,
             CategorySeeder::class,    // Категории нужны для продуктов
             ProductSeeder::class,     // Продукты нужны для корзины и заказов
             UserSeeder::class,        // Пользователи нужны для корзины и заказов

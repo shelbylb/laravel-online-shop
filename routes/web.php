@@ -7,6 +7,8 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\UserController;
 
 
 Route::get('/dashboard', function () {
@@ -53,3 +55,13 @@ Route::patch('/cart/items/{product}', [CartController::class, 'update'])->name('
 Route::delete('/cart/items/{product}', [CartController::class, 'destroy'])->name('cart.items.destroy');
 
 Route::delete('/cart', [CartController::class, 'clear'])->name('cart.clear');
+
+Route::middleware(['auth', 'role:admin,manager'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+        Route::get('/', [DashboardController::class, 'index'])
+            ->name('dashboard');
+
+        Route::resource('users', UserController::class);
+    });

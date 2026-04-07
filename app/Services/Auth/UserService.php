@@ -10,7 +10,7 @@ class UserService
     public function register(RegisterDTO $dto): User
     {
         $user = new User();
-        $user->first_name = $dto->first_name;
+        $user->name = $dto->name;
         $user->last_name = $dto->last_name;
         $user->email = $dto->email;
         $user->password = Hash::make($dto->password);

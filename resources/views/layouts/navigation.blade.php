@@ -27,6 +27,15 @@
                             {{ __('Мои заказы') }}
                         </x-nav-link>
                     @endauth
+
+                    <!-- Ссылка на админку (только для авторизованных с соответствующей ролью) -->
+                    @auth
+                        @if(auth()->user()->hasAnyRole([\App\Models\Role::ROLE_ADMIN, \App\Models\Role::ROLE_MANAGER]))
+                            <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.*')">
+                                {{ __('Админка') }}
+                            </x-nav-link>
+                        @endif
+                    @endauth
                 </div>
             </div>
 
@@ -53,7 +62,7 @@
                     <x-slot name="trigger">
                         <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
                             @auth
-                                <div>{{ Auth::user()->first_name }}</div>
+                                <div>{{ Auth::user()->name }}</div>
                             @else
                                 <div>Гость</div>
                             @endauth
@@ -74,7 +83,7 @@
                             </x-dropdown-link>
 
                             <x-dropdown-link :href="route('profile.edit')">
-                                {{ __('Profile') }}
+                                {{ __('Профиль') }}
                             </x-dropdown-link>
 
                             <!-- Authentication -->
@@ -83,15 +92,15 @@
                                 <x-dropdown-link :href="route('logout')"
                                                  onclick="event.preventDefault();
                                                     this.closest('form').submit();">
-                                    {{ __('Log Out') }}
+                                    {{ __('Выйти') }}
                                 </x-dropdown-link>
                             </form>
                         @else
                             <x-dropdown-link :href="route('login')">
-                                {{ __('Login') }}
+                                {{ __('Войти') }}
                             </x-dropdown-link>
                             <x-dropdown-link :href="route('register')">
-                                {{ __('Register') }}
+                                {{ __('Зарегистрироваться') }}
                             </x-dropdown-link>
                         @endauth
                     </x-slot>
@@ -141,13 +150,22 @@
                     </span>
                 </div>
             </x-responsive-nav-link>
+
+            <!-- Ссылка на админку (только для авторизованных с соответствующей ролью) -->
+            @auth
+                @if(auth()->user()->hasAnyRole([\App\Models\Role::ROLE_ADMIN, \App\Models\Role::ROLE_MANAGER]))
+                    <x-responsive-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.*')">
+                        {{ __('Админка') }}
+                    </x-responsive-nav-link>
+                @endif
+            @endauth
         </div>
 
         <!-- Responsive Settings Options -->
         <div class="pt-4 pb-1 border-t border-gray-200">
             @auth
                 <div class="px-4">
-                    <div class="font-medium text-base text-gray-800">{{ Auth::user()->first_name }}</div>
+                    <div class="font-medium text-base text-gray-800">{{ Auth::user()->name }}</div>
                     <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
                 </div>
 
