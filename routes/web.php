@@ -9,6 +9,7 @@ use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\ProductController as AdminProductController;
 
 
 Route::get('/dashboard', function () {
@@ -56,6 +57,10 @@ Route::delete('/cart/items/{product}', [CartController::class, 'destroy'])->name
 
 Route::delete('/cart', [CartController::class, 'clear'])->name('cart.clear');
 
+Route::post('/cart/items/{product}/increase', [CartController::class, 'increase'])->name('cart.items.increase');
+Route::post('/cart/items/{product}/decrease', [CartController::class, 'decrease'])->name('cart.items.decrease');
+Route::get('/cart/items/quantities', [CartController::class, 'quantities'])->name('cart.items.quantities');
+
 Route::middleware(['auth', 'role:admin,manager'])
     ->prefix('admin')
     ->name('admin.')
@@ -64,4 +69,5 @@ Route::middleware(['auth', 'role:admin,manager'])
             ->name('dashboard');
 
         Route::resource('users', UserController::class);
+        Route::resource('products', AdminProductController::class);
     });

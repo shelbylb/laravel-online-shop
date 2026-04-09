@@ -15,7 +15,7 @@ class Category extends Model
     }
 
     // Простой метод без сложностей
-    public static function findBySlug($slug): null
+    public static function findBySlug($slug): ?self
     {
         return self::query()->where('slug', $slug)->first();
     }

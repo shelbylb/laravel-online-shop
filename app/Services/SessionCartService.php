@@ -3,11 +3,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\DTOs\ProductFilterDto;
 use App\Models\Product;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use integration\PHP8\ConstructorPromotionTest;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class SessionCartService
 {
@@ -176,6 +172,18 @@ class SessionCartService
         $raw = $this->getRaw();
         unset($raw[$productId]);
         $this->putRaw($raw);
+    }
+
+    public function getProductQuantity(Product $product): int
+    {
+        $raw = $this->getRaw();
+
+        return (int) ($raw[$product->id] ?? 0);
+    }
+
+    public function getQuantities(): array
+    {
+        return $this->getRaw();
     }
 
 }

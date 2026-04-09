@@ -109,7 +109,7 @@ class ProductService
          * 5) Пагинация + сохранение query string
          * withQueryString() — чтобы при переключении страниц фильтры НЕ сбрасывались.
          */
-        return $query->paginate($dto->per_page)->withQueryString();
+        return $query->paginate($perPage)->withQueryString();
     }
 
     public function getMaxProductPrice(): int

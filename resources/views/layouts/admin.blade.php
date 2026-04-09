@@ -222,6 +222,11 @@
                 Пользователи
             </a>
 
+            <a href="{{ route('admin.products.index') }}"
+               class="{{ request()->routeIs('admin.products.*') ? 'active' : '' }}">
+                Товары
+            </a>
+
             <a href="{{ url('/') }}">
                 На сайт
             </a>

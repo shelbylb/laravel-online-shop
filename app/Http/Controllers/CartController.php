@@ -7,6 +7,7 @@ use App\Services\SessionCartService;
 use Illuminate\Http\Request;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
 
 class CartController extends Controller
 {
@@ -16,7 +17,6 @@ class CartController extends Controller
 
     public function index(): Factory|View
     {
-
         return view('cart.index', [
             'items' => $this->sessionCartService->getItems(),
             'totalQuantity' => $this->sessionCartService->getTotalQuantity(),
@@ -33,10 +33,10 @@ class CartController extends Controller
         $result = $this->sessionCartService->add($product, (int) ($data['quantity'] ?? 1));
 
         if (is_array($result)) {
-            return $this->respond($request, $result);
+            return $this->respond($request, $result, $product);
         }
 
-        return $this->respond($request);
+        return $this->respond($request, null, $product);
     }
 
     public function update(Product $product, Request $request)
@@ -47,31 +47,73 @@ class CartController extends Controller
 
         $this->sessionCartService->setQuantity($product, (int) $data['quantity']);
 
-        return $this->respond($request);
+        return $this->respond($request, null, $product);
     }
 
     public function destroy(Product $product, Request $request)
     {
         $this->sessionCartService->remove($product);
-        return $this->respond($request);
+
+        return $this->respond($request, null, $product);
     }
 
     public function clear(Request $request)
     {
         $this->sessionCartService->clear();
+
         return $this->respond($request);
     }
 
-    private function respond(Request $request, $result = null)
+    public function increase(Product $product, Request $request)
+    {
+        $result = $this->sessionCartService->add($product, 1);
+
+        if (is_array($result)) {
+            return $this->respond($request, $result, $product);
+        }
+
+        return $this->respond($request, null, $product);
+    }
+
+    public function decrease(Product $product, Request $request)
+    {
+        $currentQuantity = $this->sessionCartService->getProductQuantity($product);
+
+        if ($currentQuantity <= 1) {
+            $this->sessionCartService->remove($product);
+        } else {
+            $this->sessionCartService->setQuantity($product, $currentQuantity - 1);
+        }
+
+        return $this->respond($request, [
+            'success' => true,
+            'message' => 'Количество товара обновлено.',
+        ], $product);
+    }
+
+    public function quantities(): JsonResponse
+    {
+        return response()->json([
+            'success' => true,
+            'quantities' => $this->sessionCartService->getQuantities(),
+            'cartCount' => $this->sessionCartService->getTotalQuantity(),
+        ]);
+    }
+
+    private function respond(Request $request, $result = null, ?Product $product = null)
     {
         $cartCount = $this->sessionCartService->getTotalQuantity();
 
-        // Сохраняем в сессию
         session(['cart_count' => $cartCount]);
 
         $payload = [
             'cartCount' => $cartCount,
         ];
+
+        if ($product) {
+            $payload['product_id'] = $product->id;
+            $payload['quantity'] = $this->sessionCartService->getProductQuantity($product);
+        }
 
         if ($result) {
             if (isset($result['message'])) {

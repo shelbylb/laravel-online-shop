@@ -35,7 +35,7 @@
                                 <img src="{{ asset('storage/' . $product->image) }}"
                                      alt="{{ $product->name }}"
                                      class="rounded me-3"
-                                     style="width: 60px; height: 60px; object-fit: cover;">
+                                     style="width: 60px; height: 60px; object-fit: contain;">
                             @else
                                 <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center"
                                      style="width: 60px; height: 60px;">

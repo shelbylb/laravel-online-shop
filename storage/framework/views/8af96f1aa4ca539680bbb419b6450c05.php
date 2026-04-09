@@ -56,7 +56,7 @@
             }
         });
 
-        const oldCounters = document.querySelectorAll('[data-cart-count]');
+        const oldCounters = document.querySelectorAll('[data-cart-counter]');
         oldCounters.forEach(counter => {
             counter.textContent = count;
             if (count > 0) {
@@ -200,7 +200,7 @@
 <?php $__env->startSection('cart-button'); ?>
     <a href="<?php echo e(route('cart.index')); ?>" class="btn btn-outline-primary btn-sm position-relative">
         Корзина
-        <span class="badge bg-secondary ms-1" data-cart-count><?php echo e($cartCount); ?></span>
+        <span class="badge bg-secondary ms-1" data-cart-counter><?php echo e($cartCount); ?></span>
     </a>
 <?php $__env->stopSection(); ?>
 </body>

@@ -55,7 +55,7 @@
             }
         });
 
-        const oldCounters = document.querySelectorAll('[data-cart-count]');
+        const oldCounters = document.querySelectorAll('[data-cart-counter]');
         oldCounters.forEach(counter => {
             counter.textContent = count;
             if (count > 0) {
@@ -199,7 +199,7 @@
 @section('cart-button')
     <a href="{{ route('cart.index') }}" class="btn btn-outline-primary btn-sm position-relative">
         Корзина
-        <span class="badge bg-secondary ms-1" data-cart-count>{{ $cartCount }}</span>
+        <span class="badge bg-secondary ms-1" data-cart-counter>{{ $cartCount }}</span>
     </a>
 @endsection
 </body>
