@@ -59,7 +59,7 @@ class UserController extends Controller
     {
         $this->authorize('view', $user);
 
-        $user->load('roles');
+        $user->load('role');
 
         return view('admin.users.show', compact('user'));
     }
@@ -68,7 +68,7 @@ class UserController extends Controller
     {
         $this->authorize('update', $user);
 
-        $user->load('roles');
+        $user->load('role');
         $roles = Role::query()->get();
 
         return view('admin.users.edit', compact('user', 'roles'));

@@ -2,10 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
-use Illuminate\Database\Seeder;
 use App\Models\Product;
-use App\Models\Category;
+use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
@@ -18,7 +16,6 @@ class ProductSeeder extends Seeder
     {
         $this->command->info('🚀 Запуск ProductSeeder...');
 
-        // Проверяем существование таблиц
         if (!Schema::hasTable('products')) {
             $this->command->error('❌ Таблица products не существует!');
             $this->command->info('💡 Сначала запустите миграции: php artisan migrate');
@@ -27,23 +24,22 @@ class ProductSeeder extends Seeder
 
         if (!Schema::hasTable('categories')) {
             $this->command->error('❌ Таблица categories не существует!');
-            $this->command->info('💡 Сначала запустите CategorySeeder');
+            $this->command->info('💡 Сначала запустите миграции и CategorySeeder');
             return;
         }
 
-        // Проверяем, есть ли категории
-        $categoryCount = DB::table('categories')->count();
-        if ($categoryCount === 0) {
-            $this->command->warn('⚠️ Таблица categories пуста! Создаем основные категории...');
-            $this->createBasicCategories();
-        }
+        $this->ensureRequiredCategoriesExist();
 
-        // Проверяем, не пустая ли уже таблица products
         $existingProducts = DB::table('products')->count();
+
         if ($existingProducts > 0) {
             $this->command->warn("⚠️ Таблица products уже содержит {$existingProducts} записей.");
 
-            $answer = $this->command->choice('Что делать?', ['Пропустить', 'Очистить и создать заново', 'Добавить к существующим'], 0);
+            $answer = $this->command->choice(
+                'Что делать?',
+                ['Пропустить', 'Очистить и создать заново', 'Добавить к существующим'],
+                0
+            );
 
             if ($answer === 'Пропустить') {
                 $this->command->info('✅ Пропускаем создание товаров.');
@@ -52,23 +48,21 @@ class ProductSeeder extends Seeder
             }
 
             if ($answer === 'Очистить и создать заново') {
-                DB::table('products')->truncate();
+                DB::statement('TRUNCATE TABLE products RESTART IDENTITY CASCADE');
                 $this->command->info('🗑️ Таблица products очищена.');
-                $existingProducts = 0;
             }
         }
 
         $this->command->info('🎨 Создание товаров...');
 
-        // Выбираем метод создания
         $method = $this->command->choice('Выберите метод создания:', [
-            'Создать конкретные 10 товаров (3 сапога, 4 туфли, 3 кроссовки)',
+            'Создать конкретные 10 товаров (4 сумки, 3 рюкзака, 3 клатча)',
             'Использовать фабрику для создания товаров',
             'Создать только товары для основных категорий',
         ], 0);
 
         switch ($method) {
-            case 'Создать конкретные 10 товаров (3 сапога, 4 туфли, 3 кроссовки)':
+            case 'Создать конкретные 10 товаров (4 сумки, 3 рюкзака, 3 клатча)':
                 $this->createSpecificProducts();
                 break;
 
@@ -87,26 +81,23 @@ class ProductSeeder extends Seeder
     }
 
     /**
-     * Создать основные категории если их нет
+     * Проверка наличия обязательных категорий
      */
-    private function createBasicCategories(): void
+    private function ensureRequiredCategoriesExist(): void
     {
-        $basicCategories = [
-            ['name' => 'сапоги', 'slug' => 'boots'],
-            ['name' => 'туфли', 'slug' => 'shoes'],
-            ['name' => 'кроссовки', 'slug' => 'sneakers'],
-        ];
+        $requiredSlugs = ['bags', 'backpacks', 'clutches'];
 
-        foreach ($basicCategories as $category) {
-            if (!DB::table('categories')->where('slug', $category['slug'])->exists()) {
-                DB::table('categories')->insert([
-                    'name' => $category['name'],
-                    'slug' => $category['slug'],
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
-                $this->command->info("   ✓ Создана категория: {$category['name']}");
-            }
+        $existing = DB::table('categories')
+            ->whereIn('slug', $requiredSlugs)
+            ->pluck('slug')
+            ->all();
+
+        $missing = array_diff($requiredSlugs, $existing);
+
+        if (!empty($missing)) {
+            throw new \RuntimeException(
+                'Не найдены обязательные категории: ' . implode(', ', $missing) . '. Сначала запустите CategorySeeder.'
+            );
         }
     }
 
@@ -115,115 +106,145 @@ class ProductSeeder extends Seeder
      */
     private function createSpecificProducts(): void
     {
-        // Получаем ID категорий
-        $bootsCategory = DB::table('categories')->where('slug', 'boots')->first();
-        $shoesCategory = DB::table('categories')->where('slug', 'shoes')->first();
-        $sneakersCategory = DB::table('categories')->where('slug', 'sneakers')->first();
+        $bagsCategory = DB::table('categories')->where('slug', 'bags')->first();
+        $backpacksCategory = DB::table('categories')->where('slug', 'backpacks')->first();
+        $clutchesCategory = DB::table('categories')->where('slug', 'clutches')->first();
 
-        if (!$bootsCategory || !$shoesCategory || !$sneakersCategory) {
+        if (!$bagsCategory || !$backpacksCategory || !$clutchesCategory) {
             $this->command->error('❌ Не найдены необходимые категории!');
             return;
         }
 
         $products = [
-            // Сапоги (3 товара)
+            // Сумки
             [
-                'name' => 'Зимние утепленные сапоги Timberland',
-                'description' => 'Теплые сапоги на меху для холодной зимы. Водонепроницаемые, с противоскользящей подошвой. Натуральная кожа, удобная колодка.',
+                'name' => 'Кожаная сумка Michael Kors Jet Set',
+                'description' => 'Элегантная женская сумка из экокожи. Вместительная, с удобными ручками и стильной металлической фурнитурой.',
                 'price' => 12999.99,
-                'image' => 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=640&h=480&fit=crop',
-                'category_id' => $bootsCategory->id,
+                'image' => 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=640&h=480&fit=crop',
+                'category_id' => $bagsCategory->id,
+                'sku' => 'BAG-001',
+                'stock' => 10,
+                'status' => 'active',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'name' => 'Резиновые сапоги Hunter Original',
-                'description' => 'Водонепроницаемые сапоги для дождливой погоды. Легкие и удобные для длительных прогулок. Классический дизайн.',
-                'price' => 7499.50,
-                'image' => 'https://images.unsplash.com/photo-1560343090-f0409e92791a?w=640&h=480&fit=crop',
-                'category_id' => $bootsCategory->id,
+                'name' => 'Повседневная сумка Guess Noelle',
+                'description' => 'Удобная сумка для повседневного использования. Подходит для города, работы и прогулок.',
+                'price' => 8999.50,
+                'image' => 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=640&h=480&fit=crop',
+                'category_id' => $bagsCategory->id,
+                'sku' => 'BAG-002',
+                'stock' => 12,
+                'status' => 'active',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'name' => 'Ковбойские сапоги Ariat Heritage',
-                'description' => 'Стильные сапоги в ковбойском стиле из натуральной кожи. Удобные для повседневной носки. Прочная подошва.',
+                'name' => 'Сумка через плечо Furla Metropolis',
+                'description' => 'Компактная и стильная сумка через плечо. Отлично подходит для вечерних выходов и повседневного образа.',
                 'price' => 15899.00,
-                'image' => 'https://images.unsplash.com/photo-1608256246203-29f5a8acb774?w=640&h=480&fit=crop',
-                'category_id' => $bootsCategory->id,
+                'image' => 'https://images.unsplash.com/photo-1591561954557-26941169b49e?w=640&h=480&fit=crop',
+                'category_id' => $bagsCategory->id,
+                'sku' => 'BAG-003',
+                'stock' => 8,
+                'status' => 'active',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'Шоппер Lacoste Daily Classic',
+                'description' => 'Вместительная сумка-шоппер для ежедневного использования. Подходит для покупок, офиса и учебы.',
+                'price' => 7600.00,
+                'image' => 'https://images.unsplash.com/photo-1559563458-527698bf5295?w=640&h=480&fit=crop',
+                'category_id' => $bagsCategory->id,
+                'sku' => 'BAG-004',
+                'stock' => 14,
+                'status' => 'active',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
 
-            // Туфли (4 товара)
+            // Рюкзаки
             [
-                'name' => 'Классические черные туфли Geox Uomo',
-                'description' => 'Туфли для делового стиля. Натуральная кожа, дышащая подошва. Идеальны для офиса и важных встреч.',
-                'price' => 8999.00,
-                'image' => 'https://images.unsplash.com/photo-1597045566677-8cf032ed6634?w=640&h=480&fit=crop',
-                'category_id' => $shoesCategory->id,
+                'name' => 'Городской рюкзак Herschel Little America',
+                'description' => 'Практичный рюкзак для города и поездок. Вместительное основное отделение, удобные лямки, стильный дизайн.',
+                'price' => 10999.00,
+                'image' => 'https://images.unsplash.com/photo-1581605405669-fcdf81165afa?w=640&h=480&fit=crop',
+                'category_id' => $backpacksCategory->id,
+                'sku' => 'BACKPACK-001',
+                'stock' => 9,
+                'status' => 'active',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'name' => 'Коричневые броги Clarks Originals',
-                'description' => 'Стильные туфли с перфорацией. Идеальны для офиса и повседневной носки. Высокое качество изготовления.',
-                'price' => 11200.00,
-                'image' => 'https://images.unsplash.com/photo-1595341888016-a392ef81b7de?w=640&h=480&fit=crop',
-                'category_id' => $shoesCategory->id,
+                'name' => 'Спортивный рюкзак Nike Utility Speed',
+                'description' => 'Легкий и удобный рюкзак для тренировок, учебы и повседневного ношения.',
+                'price' => 8200.00,
+                'image' => 'https://images.unsplash.com/photo-1622560480605-d83c853bc5c3?w=640&h=480&fit=crop',
+                'category_id' => $backpacksCategory->id,
+                'sku' => 'BACKPACK-002',
+                'stock' => 11,
+                'status' => 'active',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
-                'name' => 'Лоферы Ecco Soft 7',
-                'description' => 'Удобные туфли без шнуровки. Мягкая стелька, гибкая подошва. Подходят для повседневной носки.',
+                'name' => 'Туристический рюкзак Deuter Futura',
+                'description' => 'Надежный рюкзак для путешествий и активного отдыха. Эргономичная спинка и множество карманов.',
+                'price' => 14500.00,
+                'image' => 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=640&h=480&fit=crop',
+                'category_id' => $backpacksCategory->id,
+                'sku' => 'BACKPACK-003',
+                'stock' => 6,
+                'status' => 'active',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+
+            // Клатчи
+            [
+                'name' => 'Вечерний клатч Aldo Glam Shine',
+                'description' => 'Элегантный вечерний клатч с блестящим покрытием. Подходит для торжественных мероприятий.',
+                'price' => 5999.00,
+                'image' => 'https://images.unsplash.com/photo-1575032617751-6ddec2089882?w=640&h=480&fit=crop',
+                'category_id' => $clutchesCategory->id,
+                'sku' => 'CLUTCH-001',
+                'stock' => 13,
+                'status' => 'active',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'Клатч-конверт Mango Elegant',
+                'description' => 'Минималистичный клатч-конверт для повседневного и вечернего образа.',
+                'price' => 4200.00,
+                'image' => 'https://images.unsplash.com/photo-1594223274512-ad4803739b7c?w=640&h=480&fit=crop',
+                'category_id' => $clutchesCategory->id,
+                'sku' => 'CLUTCH-002',
+                'stock' => 10,
+                'status' => 'active',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'Премиальный клатч Coach Signature',
+                'description' => 'Стильный клатч премиум-класса с фирменным дизайном. Компактный и удобный.',
                 'price' => 9800.00,
-                'image' => 'https://images.unsplash.com/photo-1564584217132-2271feaeb3c5?w=640&h=480&fit=crop',
-                'category_id' => $shoesCategory->id,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'Оксфорды Salvatore Ferragamo',
-                'description' => 'Формальные туфли со шнуровкой. Премиум качество, ручная работа. Идеальны для особых случаев.',
-                'price' => 24500.00,
-                'image' => 'https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=640&h=480&fit=crop',
-                'category_id' => $shoesCategory->id,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-
-            // Кроссовки (3 товара)
-            [
-                'name' => 'Беговые кроссовки Nike Air Max 270',
-                'description' => 'Легкие кроссовки для бега с амортизацией. Технология Air для комфорта. Современный дизайн.',
-                'price' => 13999.00,
-                'image' => 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=640&h=480&fit=crop',
-                'category_id' => $sneakersCategory->id,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'Баскетбольные кроссовки Adidas Harden Vol. 6',
-                'description' => 'Высокие кроссовки для баскетбола с поддержкой голеностопа. Технология Boost для амортизации.',
-                'price' => 15999.00,
-                'image' => 'https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=640&h=480&fit=crop',
-                'category_id' => $sneakersCategory->id,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'Повседневные кроссовки New Balance 574',
-                'description' => 'Удобные кроссовки для повседневной носки. Стильный дизайн, комфорт на весь день. Классическая модель.',
-                'price' => 8999.00,
-                'image' => 'https://images.unsplash.com/photo-1600269452121-4f2416e55c28?w=640&h=480&fit=crop',
-                'category_id' => $sneakersCategory->id,
+                'image' => 'https://images.unsplash.com/photo-1585487000143-2d9493f6a41e?w=640&h=480&fit=crop',
+                'category_id' => $clutchesCategory->id,
+                'sku' => 'CLUTCH-003',
+                'stock' => 7,
+                'status' => 'active',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
         ];
 
         $createdCount = 0;
+
         foreach ($products as $product) {
             if (!DB::table('products')->where('name', $product['name'])->exists()) {
                 DB::table('products')->insert($product);
@@ -242,15 +263,6 @@ class ProductSeeder extends Seeder
     {
         $this->command->info("Создание {$count} товаров через фабрику...");
 
-        // Создаем распределение по категориям
-        $categories = DB::table('categories')->get();
-
-        if ($categories->isEmpty()) {
-            $this->command->error('❌ Нет категорий для создания товаров!');
-            return;
-        }
-
-        // Создаем товары
         Product::factory()->count($count)->create();
 
         $this->command->info("✅ Создано {$count} товаров через фабрику");
@@ -261,50 +273,52 @@ class ProductSeeder extends Seeder
      */
     private function createProductsForBasicCategories(): void
     {
-        $bootsCategory = DB::table('categories')->where('slug', 'boots')->first();
-        $shoesCategory = DB::table('categories')->where('slug', 'shoes')->first();
-        $sneakersCategory = DB::table('categories')->where('slug', 'sneakers')->first();
+        $bagsCategory = DB::table('categories')->where('slug', 'bags')->first();
+        $backpacksCategory = DB::table('categories')->where('slug', 'backpacks')->first();
+        $clutchesCategory = DB::table('categories')->where('slug', 'clutches')->first();
 
-        if (!$bootsCategory || !$shoesCategory || !$sneakersCategory) {
+        if (!$bagsCategory || !$backpacksCategory || !$clutchesCategory) {
             $this->command->error('❌ Не найдены основные категории!');
             return;
         }
 
-        // Создаем товары для каждой категории
-        $bootsCount = 3;
-        $shoesCount = 4;
-        $sneakersCount = 3;
+        $bagsCount = 4;
+        $backpacksCount = 3;
+        $clutchesCount = 3;
 
         $this->command->info("Создание товаров для категорий:");
-        $this->command->info("  - Сапоги: {$bootsCount} товара");
-        $this->command->info("  - Туфли: {$shoesCount} товара");
-        $this->command->info("  - Кроссовки: {$sneakersCount} товара");
+        $this->command->info("  - Сумки: {$bagsCount} товара");
+        $this->command->info("  - Рюкзаки: {$backpacksCount} товара");
+        $this->command->info("  - Клатчи: {$clutchesCount} товара");
 
-        // Создаем товары для сапог
-        if ($bootsCount > 0) {
-            Product::factory()->count($bootsCount)->boots()->create([
-                'category_id' => $bootsCategory->id,
+        Product::factory()
+            ->count($bagsCount)
+            ->bags()
+            ->create([
+                'category_id' => $bagsCategory->id,
             ]);
-            $this->command->info("  ✓ Создано {$bootsCount} товаров для категории 'сапоги'");
-        }
 
-        // Создаем товары для туфель
-        if ($shoesCount > 0) {
-            Product::factory()->count($shoesCount)->shoes()->create([
-                'category_id' => $shoesCategory->id,
+        $this->command->info("  ✓ Создано {$bagsCount} товаров для категории 'сумки'");
+
+        Product::factory()
+            ->count($backpacksCount)
+            ->backpacks()
+            ->create([
+                'category_id' => $backpacksCategory->id,
             ]);
-            $this->command->info("  ✓ Создано {$shoesCount} товаров для категории 'туфли'");
-        }
 
-        // Создаем товары для кроссовок
-        if ($sneakersCount > 0) {
-            Product::factory()->count($sneakersCount)->sneakers()->create([
-                'category_id' => $sneakersCategory->id,
+        $this->command->info("  ✓ Создано {$backpacksCount} товаров для категории 'рюкзаки'");
+
+        Product::factory()
+            ->count($clutchesCount)
+            ->clutches()
+            ->create([
+                'category_id' => $clutchesCategory->id,
             ]);
-            $this->command->info("  ✓ Создано {$sneakersCount} товаров для категории 'кроссовки'");
-        }
 
-        $total = $bootsCount + $shoesCount + $sneakersCount;
+        $this->command->info("  ✓ Создано {$clutchesCount} товаров для категории 'клатчи'");
+
+        $total = $bagsCount + $backpacksCount + $clutchesCount;
         $this->command->info("✅ Всего создано: {$total} товаров");
     }
 
@@ -321,7 +335,6 @@ class ProductSeeder extends Seeder
         $this->command->info("   Всего категорий: {$totalCategories}");
 
         if ($totalProducts > 0) {
-            // Статистика по категориям
             $stats = DB::select("
                 SELECT
                     c.name as category_name,
@@ -352,7 +365,6 @@ class ProductSeeder extends Seeder
 
             $this->command->table($headers, $rows);
 
-            // Общая статистика цен
             $priceStats = DB::select("
                 SELECT
                     COUNT(*) as total,
@@ -370,36 +382,43 @@ class ProductSeeder extends Seeder
     }
 
     /**
-     * Создать товары-примеры (для быстрого тестирования)
+     * Создать товары-примеры
      */
     public function createSampleProducts(): void
     {
         $this->command->info('Создание примеров товаров...');
 
-        // Получаем или создаем категории
-        $bootsId = DB::table('categories')->where('slug', 'boots')->value('id');
-        $shoesId = DB::table('categories')->where('slug', 'shoes')->value('id');
-        $sneakersId = DB::table('categories')->where('slug', 'sneakers')->value('id');
+        $bagsId = DB::table('categories')->where('slug', 'bags')->value('id');
+        $backpacksId = DB::table('categories')->where('slug', 'backpacks')->value('id');
+        $clutchesId = DB::table('categories')->where('slug', 'clutches')->value('id');
 
-        // Создаем по 2 товара в каждую категорию
         $sampleProducts = [
             [
-                'name' => 'Теплые зимние сапоги',
-                'description' => 'Отличные сапоги для холодной зимы',
+                'name' => 'Базовая женская сумка',
+                'description' => 'Удобная сумка для повседневного использования',
                 'price' => 5999.99,
-                'category_id' => $bootsId,
+                'category_id' => $bagsId,
+                'sku' => 'SAMPLE-BAG-001',
+                'stock' => 5,
+                'status' => 'active',
             ],
             [
-                'name' => 'Кожаные туфли',
-                'description' => 'Стильные туфли для офиса',
+                'name' => 'Городской рюкзак',
+                'description' => 'Практичный рюкзак для города и учебы',
                 'price' => 4599.00,
-                'category_id' => $shoesId,
+                'category_id' => $backpacksId,
+                'sku' => 'SAMPLE-BACKPACK-001',
+                'stock' => 5,
+                'status' => 'active',
             ],
             [
-                'name' => 'Спортивные кроссовки',
-                'description' => 'Удобные кроссовки для тренировок',
+                'name' => 'Элегантный клатч',
+                'description' => 'Стильный клатч для вечерних выходов',
                 'price' => 3999.00,
-                'category_id' => $sneakersId,
+                'category_id' => $clutchesId,
+                'sku' => 'SAMPLE-CLUTCH-001',
+                'stock' => 5,
+                'status' => 'active',
             ],
         ];
 

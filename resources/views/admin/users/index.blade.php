@@ -73,9 +73,11 @@
                     <td>{{ $user->name }}</td>
                     <td>{{ $user->email }}</td>
                     <td>
-                        @foreach($user->roles as $role)
-                            <span class="badge">{{ $role->name }}</span>
-                        @endforeach
+                        @if($user->role)
+                            <span class="badge">{{ $user->role->name }}</span>
+                        @else
+                            <span class="badge">Без роли</span>
+                        @endif
                     </td>
                     <td>
                         <a href="{{ route('admin.users.show', $user) }}" class="btn btn-secondary btn-sm">

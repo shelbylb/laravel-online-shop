@@ -227,6 +227,11 @@
                 Товары
             </a>
 
+            <a href="{{ route('admin.orders.index') }}"
+               class="{{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">
+                Заказы
+            </a>
+
             <a href="{{ url('/') }}">
                 На сайт
             </a>
@@ -234,6 +239,16 @@
     </aside>
 
     <main class="content">
+        @if(session('success'))
+            <div class="alert alert-success">{{ session('success') }}</div>
+        @endif
+
+        @if(session('error'))
+            <div class="alert" style="background: #fee2e2; color: #991b1b;">
+                {{ session('error') }}
+            </div>
+        @endif
+
         @yield('content')
     </main>
 </div>

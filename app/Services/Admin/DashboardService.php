@@ -12,13 +12,16 @@ class DashboardService
     {
         $usersCount = User::query()->count();
 
-        $adminsCount = User::query()
-            ->whereHas('roles', fn ($query) => $query->where('slug', Role::ROLE_ADMIN))
-            ->count();
+        $adminRoleId = Role::query()->where('slug', Role::ROLE_ADMIN)->value('id');
+        $managerRoleId = Role::query()->where('slug', Role::ROLE_MANAGER)->value('id');
 
-        $managersCount = User::query()
-            ->whereHas('roles', fn ($query) => $query->where('slug', Role::ROLE_MANAGER))
-            ->count();
+        $adminsCount = $adminRoleId
+            ? User::query()->where('role_id', $adminRoleId)->count()
+            : 0;
+
+        $managersCount = $managerRoleId
+            ? User::query()->where('role_id', $managerRoleId)->count()
+            : 0;
 
         return new DashboardDTO(
             usersCount: $usersCount,

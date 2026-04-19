@@ -61,34 +61,28 @@
 </div>
 
 <div class="form-group">
-    <label class="form-label">Роли</label>
+    <label class="form-label">Роль</label>
 
     @php
-        $selectedRoles = old(
-            'roles',
-            isset($user) ? $user->roles->pluck('slug')->toArray() : []
-        );
+        $selectedRole = old('role', $user->role->slug ?? null);
     @endphp
 
     @foreach($roles as $role)
         <div style="margin-bottom:8px;">
             <label>
                 <input
-                    type="checkbox"
-                    name="roles[]"
+                    type="radio"
+                    name="role"
                     value="{{ $role->slug }}"
-                    {{ in_array($role->slug, $selectedRoles, true) ? 'checked' : '' }}
+                    {{ $selectedRole === $role->slug ? 'checked' : '' }}
+                    required
                 >
                 {{ $role->name }}
             </label>
         </div>
     @endforeach
 
-    @error('roles')
-    <div class="text-danger">{{ $message }}</div>
-    @enderror
-
-    @error('roles.*')
+    @error('role')
     <div class="text-danger">{{ $message }}</div>
     @enderror
 </div>

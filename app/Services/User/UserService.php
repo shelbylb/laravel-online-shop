@@ -16,7 +16,7 @@ class UserService
     public function paginateWithFilters(UserFilterDTO $dto, int $perPage = 15): LengthAwarePaginator
     {
         return User::query()
-            ->with('roles')
+            ->with('role')
             ->when(
                 $dto->search,
                 function (Builder $query, string $search) {
@@ -30,7 +30,7 @@ class UserService
             ->when(
                 $dto->role,
                 function (Builder $query, string $role) {
-                    $query->whereHas('roles', function (Builder $roleQuery) use ($role) {
+                    $query->whereHas('role', function (Builder $roleQuery) use ($role) {
                         $roleQuery->where('slug', $role);
                     });
                 }
@@ -43,24 +43,32 @@ class UserService
     public function create(UserUpsertDTO $dto): User
     {
         return DB::transaction(function () use ($dto) {
+            $roleId = Role::query()
+                ->where('slug', $dto->role)
+                ->value('id');
+
             $user = User::query()->create([
                 'name' => $dto->name,
                 'email' => $dto->email,
                 'password' => Hash::make($dto->password),
+                'role_id' => $roleId,
             ]);
 
-            $this->syncRoles($user, $dto->roles);
-
-            return $user->load('roles');
+            return $user->load('role');
         });
     }
 
     public function update(User $user, UserUpsertDTO $dto): User
     {
         return DB::transaction(function () use ($user, $dto) {
+            $roleId = Role::query()
+                ->where('slug', $dto->role)
+                ->value('id');
+
             $payload = [
                 'name' => $dto->name,
                 'email' => $dto->email,
+                'role_id' => $roleId,
             ];
 
             if ($dto->password !== null) {
@@ -69,27 +77,12 @@ class UserService
 
             $user->update($payload);
 
-            $this->syncRoles($user, $dto->roles);
-
-            return $user->load('roles');
+            return $user->load('role');
         });
     }
 
     public function delete(User $user): void
     {
-        DB::transaction(function () use ($user) {
-            $user->roles()->detach();
-            $user->delete();
-        });
-    }
-
-    private function syncRoles(User $user, array $roleSlugs): void
-    {
-        $roleIds = Role::query()
-            ->whereIn('slug', $roleSlugs)
-            ->pluck('id')
-            ->all();
-
-        $user->roles()->sync($roleIds);
+        $user->delete();
     }
 }

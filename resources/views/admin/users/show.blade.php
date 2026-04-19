@@ -30,9 +30,11 @@
 
         <div style="margin-bottom:16px;">
             <strong>Роли:</strong><br>
-            @foreach($user->roles as $role)
-                <span class="badge">{{ $role->name }}</span>
-            @endforeach
+            @if($user->role)
+                <span class="badge">{{ $user->role->name }}</span>
+            @else
+                <span class="badge">Без роли</span>
+            @endif
         </div>
 
         <div style="margin-bottom:16px;">

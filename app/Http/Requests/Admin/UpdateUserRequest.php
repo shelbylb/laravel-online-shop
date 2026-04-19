@@ -27,21 +27,7 @@ class UpdateUserRequest extends FormRequest
                 Rule::unique('users', 'email')->ignore($userId),
             ],
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
-            'roles' => ['required', 'array', 'min:1'],
-            'roles.*' => [
-                'string',
-                Rule::in(Role::getSystemRoles()),
-            ],
-        ];
-    }
-
-    public function attributes(): array
-    {
-        return [
-            'name' => 'Имя',
-            'email' => 'Email',
-            'password' => 'Пароль',
-            'roles' => 'Роли',
+            'role' => ['required', 'string', Rule::in(Role::getSystemRoles())],
         ];
     }
 }

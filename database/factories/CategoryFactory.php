@@ -10,77 +10,46 @@ use Illuminate\Support\Str;
  */
 class CategoryFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
-        $name = $this->faker->unique()->words(2, true);
+        $name = fake()->unique()->words(2, true);
 
         return [
-            'name' => $name,
+            'name' => ucfirst($name),
             'slug' => Str::slug($name),
         ];
     }
 
     /**
-     * Создать категорию "сапоги"
+     * Сумки
      */
-    public function boots(): static
+    public function bags(): static
     {
-        return $this->state(fn (array $attributes) => [
-            'name' => 'сапоги',
-            'slug' => 'boots',
+        return $this->state(fn () => [
+            'name' => 'Сумки',
+            'slug' => 'bags',
         ]);
     }
 
     /**
-     * Создать категорию "туфли"
+     * Рюкзаки
      */
-    public function shoes(): static
+    public function backpacks(): static
     {
-        return $this->state(fn (array $attributes) => [
-            'name' => 'туфли',
-            'slug' => 'shoes',
+        return $this->state(fn () => [
+            'name' => 'Рюкзаки',
+            'slug' => 'backpacks',
         ]);
     }
 
     /**
-     * Создать категорию "кроссовки"
+     * Клатчи
      */
-    public function sneakers(): static
+    public function clutches(): static
     {
-        return $this->state(fn (array $attributes) => [
-            'name' => 'кроссовки',
-            'slug' => 'sneakers',
-        ]);
-    }
-
-    /**
-     * Создать случайную категорию обуви
-     */
-    public function shoeCategory(): static
-    {
-        $categories = [
-            ['name' => 'ботинки', 'slug' => 'boots'],
-            ['name' => 'туфли', 'slug' => 'shoes'],
-            ['name' => 'кроссовки', 'slug' => 'sneakers'],
-            ['name' => 'сандалии', 'slug' => 'sandals'],
-            ['name' => 'шлепанцы', 'slug' => 'flipflops'],
-            ['name' => 'кеды', 'slug' => 'sneakers'],
-            ['name' => 'лоферы', 'slug' => 'loafers'],
-            ['name' => 'оксфорды', 'slug' => 'oxfords'],
-            ['name' => 'мокасины', 'slug' => 'moccasins'],
-            ['name' => 'балетки', 'slug' => 'ballet-flats'],
-        ];
-
-        $category = $this->faker->randomElement($categories);
-
-        return $this->state(fn (array $attributes) => [
-            'name' => $category['name'],
-            'slug' => $category['slug'],
+        return $this->state(fn () => [
+            'name' => 'Клатчи',
+            'slug' => 'clutches',
         ]);
     }
 }

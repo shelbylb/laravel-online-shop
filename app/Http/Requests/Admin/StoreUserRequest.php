@@ -19,21 +19,7 @@ class StoreUserRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email:rfc,dns', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'roles' => ['required', 'array', 'min:1'],
-            'roles.*' => [
-                'string',
-                Rule::in(Role::getSystemRoles()),
-            ],
-        ];
-    }
-
-    public function attributes(): array
-    {
-        return [
-            'name' => 'Имя',
-            'email' => 'Email',
-            'password' => 'Пароль',
-            'roles' => 'Роли',
+            'role' => ['required', 'string', Rule::in(Role::getSystemRoles())],
         ];
     }
 }

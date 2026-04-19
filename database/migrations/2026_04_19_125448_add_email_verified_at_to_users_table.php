@@ -9,14 +9,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->renameColumn('first_name', 'name');
+            $table->timestamp('email_verified_at')->nullable()->after('email');
         });
     }
 
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->renameColumn('name', 'first_name');
+            $table->dropColumn('email_verified_at');
         });
     }
 };

@@ -11,7 +11,7 @@ class UserUpsertDTO
         public string $name,
         public string $email,
         public ?string $password,
-        public array $roles,
+        public string $role,
     ) {
     }
 
@@ -21,7 +21,7 @@ class UserUpsertDTO
             name: $request->string('name')->toString(),
             email: $request->string('email')->toString(),
             password: $request->string('password')->toString(),
-            roles: $request->input('roles', []),
+            role: $request->string('role')->toString(),
         );
     }
 
@@ -31,7 +31,7 @@ class UserUpsertDTO
             name: $request->string('name')->toString(),
             email: $request->string('email')->toString(),
             password: $request->filled('password') ? $request->string('password')->toString() : null,
-            roles: $request->input('roles', []),
+            role: $request->string('role')->toString(),
         );
     }
 }

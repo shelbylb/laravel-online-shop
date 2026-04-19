@@ -19,176 +19,164 @@ class ProductFactory extends Factory
      */
     public function definition(): array
     {
-        // Список брендов обуви
-        $brands = ['Nike', 'Adidas', 'Puma', 'Reebok', 'New Balance', 'Timberland',
-            'Geox', 'Ecco', 'Salomon', 'Clarks', 'Skechers', 'Vans', 'Converse',
-            'Dr. Martens', 'CAT', 'Steve Madden', 'Birkenstock', 'Crocs'];
-
-        // Типы обуви по категориям
-        $shoeTypes = [
-            'boots' => ['Зимние', 'Резиновые', 'Ковбойские', 'Утепленные', 'Военные', 'Демисезонные'],
-            'shoes' => ['Классические', 'Офисные', 'Вечерние', 'Оксфорды', 'Лоферы', 'Броги', 'Дерби'],
-            'sneakers' => ['Беговые', 'Баскетбольные', 'Повседневные', 'Тренировочные', 'Теннисные', 'Треккинговые'],
+        $brands = [
+            'Michael Kors', 'Guess', 'Furla', 'Lacoste', 'Coach', 'Aldo',
+            'Mango', 'Zara', 'Tommy Hilfiger', 'Calvin Klein', 'Herschel',
+            'Nike', 'Adidas', 'Puma', 'Samsonite'
         ];
 
-        $modelNames = ['Air Max', 'Classic', 'Pro', 'Lite', 'Comfort', 'Elite', 'Runner',
-            'Walker', 'Dress', 'Casual', 'Sport', 'Premium', 'Ultra', 'Flex'];
+        $bagTypes = [
+            'Сумка', 'Рюкзак', 'Клатч', 'Шоппер', 'Сумка через плечо',
+            'Дорожная сумка', 'Мини-сумка', 'Городской рюкзак'
+        ];
+
+        $modelNames = [
+            'Classic', 'Urban', 'Premium', 'Daily', 'Elegant',
+            'Travel', 'Soft', 'Modern', 'Signature', 'Style'
+        ];
 
         $brand = $this->faker->randomElement($brands);
+        $type = $this->faker->randomElement($bagTypes);
         $model = $this->faker->randomElement($modelNames);
-        $type = $this->faker->word;
 
         $name = "{$brand} {$type} {$model}";
 
-        // Получаем случайную категорию или создаем новую
         $category = Category::inRandomOrder()->first() ?? Category::factory();
 
         return [
             'name' => $name,
-            'description' => $this->faker->paragraphs(3, true),
-            'price' => $this->faker->randomFloat(2, 1500, 35000),
-            'image' => $this->generateProductImage($brand, $type),
+            'description' => $this->faker->paragraphs(2, true),
+            'price' => $this->faker->randomFloat(2, 2000, 30000),
+            'image' => $this->generateProductImage(),
             'category_id' => $category instanceof Category ? $category->id : $category,
+            'sku' => strtoupper('BAG-' . Str::random(8)),
+            'stock' => $this->faker->numberBetween(0, 50),
+            'status' => defined(Product::class . '::STATUS_ACTIVE')
+                ? Product::STATUS_ACTIVE
+                : 'active',
         ];
     }
 
     /**
      * Генерация URL изображения продукта
      */
-    private function generateProductImage(string $brand, string $type): string
+    private function generateProductImage(): string
     {
-        // Используем Unsplash для реалистичных изображений обуви
-        $unsplashThemes = [
-            'shoes' => ['shoes', 'footwear', 'sneakers', 'boots'],
-            'sneakers' => ['sneakers', 'athletic-shoes', 'running-shoes'],
-            'boots' => ['boots', 'winter-boots', 'leather-boots'],
+        $images = [
+            'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=640&h=480&fit=crop',
+            'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=640&h=480&fit=crop',
+            'https://images.unsplash.com/photo-1591561954557-26941169b49e?w=640&h=480&fit=crop',
+            'https://images.unsplash.com/photo-1559563458-527698bf5295?w=640&h=480&fit=crop',
+            'https://images.unsplash.com/photo-1581605405669-fcdf81165afa?w=640&h=480&fit=crop',
+            'https://images.unsplash.com/photo-1594223274512-ad4803739b7c?w=640&h=480&fit=crop',
         ];
 
-        $theme = $this->faker->randomElement($unsplashThemes['shoes']);
-        $width = 640;
-        $height = 480;
-
-        return "https://images.unsplash.com/photo-" . $this->faker->regexify('[0-9]{10}') .
-            "?w={$width}&h={$height}&fit=crop&crop=entropy&q=80";
+        return $this->faker->randomElement($images);
     }
 
     /**
-     * Создать товар в категории "сапоги"
+     * Создать товар в категории "сумки"
      */
-    public function boots(): static
+    public function bags(): static
     {
-        $bootNames = [
-            'Зимние утепленные сапоги',
-            'Резиновые сапоги для рыбалки',
-            'Ковбойские кожаные сапоги',
-            'Военные тактические ботинки',
-            'Осенние демисезонные сапоги',
-            'Горнолыжные ботинки',
+        $names = [
+            'Кожаная сумка',
+            'Повседневная сумка',
+            'Сумка через плечо',
+            'Шоппер',
+            'Деловая сумка',
+            'Мини-сумка',
         ];
 
         return $this->state(fn (array $attributes) => [
-            'name' => $this->faker->randomElement($bootNames),
-            'description' => $this->generateBootsDescription(),
-            'price' => $this->faker->randomFloat(2, 3000, 25000),
+            'name' => $this->faker->randomElement($names) . ' ' . $this->faker->randomElement(['Classic', 'Urban', 'Premium']),
+            'description' => $this->generateBagsDescription(),
+            'price' => $this->faker->randomFloat(2, 3000, 20000),
+            'sku' => strtoupper('BAG-' . Str::random(8)),
         ]);
     }
 
-    /**
-     * Описание для сапог
-     */
-    private function generateBootsDescription(): string
+    private function generateBagsDescription(): string
     {
-        $materials = ['натуральная кожа', 'замша', 'нубук', 'резина', 'полиуретан'];
-        $features = ['водонепроницаемые', 'утепленные мехом', 'противоскользящие',
-            'ортопедические', 'дышащие', 'износостойкие'];
-        $uses = ['для зимы', 'для дождливой погоды', 'для охоты и рыбалки',
-            'для работы', 'для походов', 'повседневные'];
+        $materials = ['экокожи', 'натуральной кожи', 'текстиля', 'замши'];
+        $features = ['вместительная', 'стильная', 'практичная', 'легкая', 'удобная'];
+        $uses = ['для офиса', 'для города', 'для прогулок', 'для ежедневного использования'];
 
         $material = $this->faker->randomElement($materials);
         $feature = $this->faker->randomElement($features);
         $use = $this->faker->randomElement($uses);
 
-        return "Качественные сапоги из {$material}. {$feature}, идеально подходят {$use}. " .
-            "Удобная колодка, надежная подошва, стильный дизайн.";
+        return "Качественная сумка из {$material}. {$feature}, отлично подходит {$use}. Удобные ручки, надежная фурнитура и современный дизайн.";
     }
 
     /**
-     * Создать товар в категории "туфли"
+     * Создать товар в категории "рюкзаки"
      */
-    public function shoes(): static
+    public function backpacks(): static
     {
-        $shoeNames = [
-            'Классические офисные туфли',
-            'Вечерние лаковые туфли',
-            'Оксфорды ручной работы',
-            'Лоферы из натуральной кожи',
-            'Дерби для делового стиля',
-            'Броги с перфорацией',
+        $names = [
+            'Городской рюкзак',
+            'Спортивный рюкзак',
+            'Туристический рюкзак',
+            'Повседневный рюкзак',
+            'Рюкзак для учебы',
+            'Компактный рюкзак',
         ];
 
         return $this->state(fn (array $attributes) => [
-            'name' => $this->faker->randomElement($shoeNames),
-            'description' => $this->generateShoesDescription(),
-            'price' => $this->faker->randomFloat(2, 2500, 20000),
+            'name' => $this->faker->randomElement($names) . ' ' . $this->faker->randomElement(['Pro', 'Travel', 'Classic']),
+            'description' => $this->generateBackpacksDescription(),
+            'price' => $this->faker->randomFloat(2, 3500, 25000),
+            'sku' => strtoupper('BACKPACK-' . Str::random(6)),
         ]);
     }
 
-    /**
-     * Описание для туфель
-     */
-    private function generateShoesDescription(): string
+    private function generateBackpacksDescription(): string
     {
-        $styles = ['делового', 'вечернего', 'кэжуал', 'классического', 'современного'];
-        $materials = ['натуральная кожа', 'лакированная кожа', 'замша', 'текстиль'];
-        $details = ['ручная работа', 'качественная строчка', 'удобная стелька',
-            'амортизирующая подошва', 'фирменная подкладка'];
+        $materials = ['полиэстера', 'нейлона', 'экокожи', 'водоотталкивающей ткани'];
+        $features = ['эргономичная спинка', 'мягкие лямки', 'вместительное отделение', 'множество карманов'];
+        $uses = ['для города', 'для путешествий', 'для учебы', 'для тренировок'];
 
-        $style = $this->faker->randomElement($styles);
         $material = $this->faker->randomElement($materials);
-        $detail = $this->faker->randomElement($details);
+        $feature = $this->faker->randomElement($features);
+        $use = $this->faker->randomElement($uses);
 
-        return "Элегантные туфли {$style} стиля из {$material}. {$detail}. " .
-            "Идеально подходят для офиса, важных встреч и торжественных мероприятий.";
+        return "Удобный рюкзак из {$material}. {$feature}, отлично подходит {$use}. Практичный дизайн и комфорт при ежедневном использовании.";
     }
 
     /**
-     * Создать товар в категории "кроссовки"
+     * Создать товар в категории "клатчи"
      */
-    public function sneakers(): static
+    public function clutches(): static
     {
-        $sneakerNames = [
-            'Беговые кроссовки с амортизацией',
-            'Баскетбольные кроссовки высокой посадки',
-            'Повседневные спортивные кроссовки',
-            'Тренировочные кроссовки для фитнеса',
-            'Ультралегкие кроссовки для бега',
-            'Стильные кроссовки для улицы',
+        $names = [
+            'Вечерний клатч',
+            'Клатч-конверт',
+            'Элегантный клатч',
+            'Мини-клатч',
+            'Праздничный клатч',
+            'Классический клатч',
         ];
 
         return $this->state(fn (array $attributes) => [
-            'name' => $this->faker->randomElement($sneakerNames),
-            'description' => $this->generateSneakersDescription(),
-            'price' => $this->faker->randomFloat(2, 2000, 15000),
+            'name' => $this->faker->randomElement($names) . ' ' . $this->faker->randomElement(['Elegant', 'Shine', 'Signature']),
+            'description' => $this->generateClutchesDescription(),
+            'price' => $this->faker->randomFloat(2, 2500, 12000),
+            'sku' => strtoupper('CLUTCH-' . Str::random(6)),
         ]);
     }
 
-    /**
-     * Описание для кроссовок
-     */
-    private function generateSneakersDescription(): string
+    private function generateClutchesDescription(): string
     {
-        $technologies = ['амортизирующая', 'дышащая', 'энергвозвращающая', 'стабилизирующая'];
-        $activities = ['для бега', 'для тренировок в зале', 'для баскетбола',
-            'для повседневной носки', 'для активного отдыха'];
-        $features = ['легкий вес', 'хорошая вентиляция', 'усиленная поддержка стопы',
-            'износостойкая подошва', 'ортопедическая стелька'];
+        $materials = ['экокожи', 'лакированного материала', 'замши', 'текстиля'];
+        $features = ['компактный размер', 'стильная отделка', 'удобный ремешок', 'элегантная форма'];
+        $uses = ['для вечерних мероприятий', 'для праздников', 'для свиданий', 'для торжественных выходов'];
 
-        $tech = $this->faker->randomElement($technologies);
-        $activity = $this->faker->randomElement($activities);
+        $material = $this->faker->randomElement($materials);
         $feature = $this->faker->randomElement($features);
+        $use = $this->faker->randomElement($uses);
 
-        return "Современные кроссовки с {$tech} технологией, предназначенные {$activity}. " .
-            "{$feature}. Обеспечивают комфорт и безопасность во время занятий спортом.";
+        return "Элегантный клатч из {$material}. {$feature}, прекрасно подходит {$use}. Подчеркивает образ и вмещает все необходимое.";
     }
 
     /**
@@ -212,12 +200,12 @@ class ProductFactory extends Factory
     }
 
     /**
-     * Создать товары распродажи (со скидкой)
+     * Создать товары распродажи
      */
     public function onSale(): static
     {
         return $this->state(fn (array $attributes) => [
-            'price' => $attributes['price'] * 0.7, // 30% скидка
+            'price' => round($attributes['price'] * 0.7, 2),
         ]);
     }
 
@@ -232,6 +220,7 @@ class ProductFactory extends Factory
             'name' => $this->faker->randomElement($premiumBrands) . ' ' . $attributes['name'],
             'price' => $this->faker->randomFloat(2, 15000, 100000),
             'description' => 'Премиум качество, дизайнерская коллекция. ' . $attributes['description'],
+            'sku' => strtoupper('PREMIUM-' . Str::random(6)),
         ]);
     }
 }
