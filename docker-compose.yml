@@ -2,7 +2,7 @@ services:
   web:
     image: nginx
     ports:
-      - "8080:80"
+      - "80:80"
     volumes:
       - ./Docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
       - ./:/var/www/html:delegated
@@ -20,6 +20,18 @@ services:
       - ./Docker/php/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
       - ./:/var/www/html
 
+  rabbitmq:
+    image: rabbitmq:4-management
+    container_name: rabbitmq
+    restart: always
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER:-guest}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD:-guest}
+      - RABBITMQ_DEFAULT_VHOST=${RABBITMQ_VHOST:-/}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
   postgres:
     image: postgres:17.6
     container_name: my_db
@@ -35,3 +47,5 @@ services:
 
 volumes:
   postgres_data:
+
+

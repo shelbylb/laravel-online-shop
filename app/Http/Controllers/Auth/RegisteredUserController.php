@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\Role;
 use App\Models\User;
+use App\Services\Auth\UserService;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,6 +16,9 @@ use Illuminate\View\View;
 
 class RegisteredUserController extends Controller
 {
+    public function __construct(public UserService $userService){
+
+    }
     /**
      * Display the registration view.
      */
@@ -36,20 +40,7 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        $userRoleId = Role::query()
-            ->where('slug', Role::ROLE_USER)
-            ->value('id');
-
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role_id' => $userRoleId,
-        ]);
-
-        Auth::login($user);
-
-        event(new Registered($user));
+        $this->userService->register($request->name, $request->email, $request->password);
 
         return redirect()->route('verification.notice');
     }

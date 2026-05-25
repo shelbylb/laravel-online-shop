@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
-class UserService
+class  UserService
 {
     public function paginateWithFilters(UserFilterDTO $dto, int $perPage = 15): LengthAwarePaginator
     {
@@ -53,6 +53,9 @@ class UserService
                 'password' => Hash::make($dto->password),
                 'role_id' => $roleId,
             ]);
+
+            SendRegistrationVerificationJob::dispatch($user->id)
+                ->afterCommit();
 
             return $user->load('role');
         });
