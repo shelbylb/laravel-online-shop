@@ -3,8 +3,9 @@
 namespace App\DTOs\User;
 
 use App\Http\Requests\Admin\UserIndexRequest;
+use Spatie\LaravelData\Data;
 
-class UserFilterDTO
+class UserFilterDTO extends Data
 {
     public function __construct(
         public ?string $search,

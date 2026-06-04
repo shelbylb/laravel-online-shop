@@ -1,203 +1,116 @@
-<nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
-    <!-- Primary Navigation Menu -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-            <div class="flex">
-                <!-- Logo -->
-                <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}">
-                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
+@php
+    $cartCount = session()->has('cart.items')
+        ? collect(session('cart.items', []))->sum()
+        : (session('cart_count', 0));
+@endphp
+
+<nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center gap-2" href="{{ route('dashboard') }}">
+            <x-application-logo style="width: 32px; height: 32px;" />
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar"
+                aria-controls="mainNavbar" aria-expanded="false" aria-label="Переключить навигацию">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="mainNavbar">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link @if(request()->routeIs('dashboard')) active fw-semibold @endif"
+                       href="{{ route('dashboard') }}">
+                        Dashboard
                     </a>
-                </div>
+                </li>
 
-                <!-- Navigation Links -->
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                        {{ __('Dashboard') }}
-                    </x-nav-link>
+                <li class="nav-item">
+                    <a class="nav-link @if(request()->routeIs('products.*')) active fw-semibold @endif"
+                       href="{{ route('products.index') }}">
+                        Каталог
+                    </a>
+                </li>
 
-                    <!-- Ссылка на каталог -->
-                    <x-nav-link :href="route('products.index')" :active="request()->routeIs('products.index')">
-                        {{ __('Каталог') }}
-                    </x-nav-link>
+                @auth
+                    <li class="nav-item">
+                        <a class="nav-link @if(request()->routeIs('orders.*')) active fw-semibold @endif"
+                           href="{{ route('orders.index') }}">
+                            Мои заказы
+                        </a>
+                    </li>
+                @endauth
 
-                    <!-- Ссылка на заказы (только для авторизованных) -->
-                    @auth
-                        <x-nav-link :href="route('orders.index')" :active="request()->routeIs('orders.*')">
-                            {{ __('Мои заказы') }}
-                        </x-nav-link>
-                    @endauth
+                @auth
+                    @if(auth()->user()->hasAnyRole([\App\Models\Role::ROLE_ADMIN, \App\Models\Role::ROLE_MANAGER]))
+                        <li class="nav-item">
+                            <a class="nav-link @if(request()->routeIs('admin.*')) active fw-semibold @endif"
+                               href="{{ route('admin.dashboard') }}">
+                                Админка
+                            </a>
+                        </li>
+                    @endif
+                @endauth
+            </ul>
 
-                    <!-- Ссылка на админку (только для авторизованных с соответствующей ролью) -->
-                    @auth
-                        @if(auth()->user()->hasAnyRole([\App\Models\Role::ROLE_ADMIN, \App\Models\Role::ROLE_MANAGER]))
-                            <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.*')">
-                                {{ __('Админка') }}
-                            </x-nav-link>
-                        @endif
-                    @endauth
-                </div>
-            </div>
-
-            <!-- Right Side Navigation -->
-            <div class="hidden sm:flex sm:items-center sm:ms-6">
-                <!-- Cart Link -->
+            <div class="d-flex align-items-center gap-3">
                 <a href="{{ route('cart.index') }}"
-                   class="relative inline-flex items-center px-3 py-2 text-sm font-medium text-gray-500 hover:text-gray-700 focus:outline-none transition duration-150 ease-in-out me-3">
-                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                   class="btn btn-outline-secondary position-relative">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none"
+                         viewBox="0 0 24 24" stroke="currentColor" class="me-1">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                              d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                              d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
                     </svg>
+                    Корзина
 
-                    <!-- Единый счетчик с data-cart-counter -->
                     <span data-cart-counter
-                          class="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-500 rounded-full"
-                          style="display: {{ session('cart_count', 0) > 0 ? 'inline-flex' : 'none' }};">
-                        {{ session('cart_count', 0) }}
+                          class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                          style="display: {{ $cartCount > 0 ? 'inline-flex' : 'none' }};">
+                        {{ $cartCount }}
                     </span>
                 </a>
 
-                <!-- Settings Dropdown -->
-                <x-dropdown align="right" width="48">
-                    <x-slot name="trigger">
-                        <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
-                            @auth
-                                <div>{{ Auth::user()->name }}</div>
-                            @else
-                                <div>Гость</div>
-                            @endauth
-
-                            <div class="ms-1">
-                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                                </svg>
-                            </div>
+                @auth
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary dropdown-toggle" type="button"
+                                data-bs-toggle="dropdown" aria-expanded="false">
+                            {{ Auth::user()->name }}
                         </button>
-                    </x-slot>
 
-                    <x-slot name="content">
-                        @auth
-                            <!-- Ссылка на заказы в выпадающем меню -->
-                            <x-dropdown-link :href="route('orders.index')">
-                                {{ __('Мои заказы') }}
-                            </x-dropdown-link>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <a class="dropdown-item" href="{{ route('orders.index') }}">
+                                    Мои заказы
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{{ route('profile.edit') }}">
+                                    Профиль
+                                </a>
+                            </li>
 
-                            <x-dropdown-link :href="route('profile.edit')">
-                                {{ __('Профиль') }}
-                            </x-dropdown-link>
+                            <li><hr class="dropdown-divider"></li>
 
-                            <!-- Authentication -->
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <x-dropdown-link :href="route('logout')"
-                                                 onclick="event.preventDefault();
-                                                    this.closest('form').submit();">
-                                    {{ __('Выйти') }}
-                                </x-dropdown-link>
-                            </form>
-                        @else
-                            <x-dropdown-link :href="route('login')">
-                                {{ __('Войти') }}
-                            </x-dropdown-link>
-                            <x-dropdown-link :href="route('register')">
-                                {{ __('Зарегистрироваться') }}
-                            </x-dropdown-link>
-                        @endauth
-                    </x-slot>
-                </x-dropdown>
+                            <li>
+                                <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                    <button type="submit" class="dropdown-item">
+                                        Выйти
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                @else
+                    <div class="d-flex gap-2">
+                        <a href="{{ route('login') }}" class="btn btn-outline-primary">
+                            Войти
+                        </a>
+                        <a href="{{ route('register') }}" class="btn btn-primary">
+                            Регистрация
+                        </a>
+                    </div>
+                @endauth
             </div>
-
-            <!-- Hamburger -->
-            <div class="-me-2 flex items-center sm:hidden">
-                <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out">
-                    <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                        <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                        <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Responsive Navigation Menu (мобильная версия) -->
-    <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
-        <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                {{ __('Dashboard') }}
-            </x-responsive-nav-link>
-
-            <!-- Catalog in mobile menu -->
-            <x-responsive-nav-link :href="route('products.index')" :active="request()->routeIs('products.index')">
-                {{ __('Каталог') }}
-            </x-responsive-nav-link>
-
-            <!-- Orders in mobile menu (только для авторизованных) -->
-            @auth
-                <x-responsive-nav-link :href="route('orders.index')" :active="request()->routeIs('orders.*')">
-                    {{ __('Мои заказы') }}
-                </x-responsive-nav-link>
-            @endauth
-
-            <!-- Cart in mobile menu -->
-            <x-responsive-nav-link :href="route('cart.index')" :active="request()->routeIs('cart.index')">
-                <div class="flex items-center justify-between w-full">
-                    <span>{{ __('Корзина') }}</span>
-                    <!-- Единый счетчик с data-cart-counter -->
-                    <span data-cart-counter
-                          class="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-500 rounded-full"
-                          style="display: {{ session('cart_count', 0) > 0 ? 'inline-flex' : 'none' }};">
-                        {{ session('cart_count', 0) }}
-                    </span>
-                </div>
-            </x-responsive-nav-link>
-
-            <!-- Ссылка на админку (только для авторизованных с соответствующей ролью) -->
-            @auth
-                @if(auth()->user()->hasAnyRole([\App\Models\Role::ROLE_ADMIN, \App\Models\Role::ROLE_MANAGER]))
-                    <x-responsive-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.*')">
-                        {{ __('Админка') }}
-                    </x-responsive-nav-link>
-                @endif
-            @endauth
-        </div>
-
-        <!-- Responsive Settings Options -->
-        <div class="pt-4 pb-1 border-t border-gray-200">
-            @auth
-                <div class="px-4">
-                    <div class="font-medium text-base text-gray-800">{{ Auth::user()->name }}</div>
-                    <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
-                </div>
-
-                <div class="mt-3 space-y-1">
-                    <!-- Orders in mobile dropdown -->
-                    <x-responsive-nav-link :href="route('orders.index')">
-                        {{ __('Мои заказы') }}
-                    </x-responsive-nav-link>
-
-                    <x-responsive-nav-link :href="route('profile.edit')">
-                        {{ __('Profile') }}
-                    </x-responsive-nav-link>
-
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <x-responsive-nav-link :href="route('logout')"
-                                               onclick="event.preventDefault();
-                                            this.closest('form').submit();">
-                            {{ __('Log Out') }}
-                        </x-responsive-nav-link>
-                    </form>
-                </div>
-            @else
-                <div class="mt-3 space-y-1">
-                    <x-responsive-nav-link :href="route('login')">
-                        {{ __('Login') }}
-                    </x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('register')">
-                        {{ __('Register') }}
-                    </x-responsive-nav-link>
-                </div>
-            @endauth
         </div>
     </div>
 </nav>
