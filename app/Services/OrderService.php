@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\DTOs\OrderData;
+use App\Jobs\SendOrderShippedNotificationJob;
 use App\Models\Order;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -75,8 +76,15 @@ class OrderService
             return false;
         }
 
+        $previousStatus = $order->status;
         $order->status = $status;
-        return $order->save();
+        $saved = $order->save();
+
+        if ($saved && $previousStatus !== Order::STATUS_SHIPPED && $status === Order::STATUS_SHIPPED) {
+            SendOrderShippedNotificationJob::dispatch($order->id);
+        }
+
+        return $saved;
     }
 
     /**

@@ -7,6 +7,7 @@ namespace App\Services\Admin;
 use App\DTOs\Admin\OrderFiltersDto;
 use App\DTOs\Admin\OrderItemsUpdateDto;
 use App\DTOs\Admin\OrderStatusUpdateDto;
+use App\Jobs\SendOrderShippedNotificationJob;
 use App\Models\Order;
 use App\Models\OrderItem;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -56,9 +57,15 @@ class OrderService
 
     public function updateStatus(Order $order, OrderStatusUpdateDto $dto): Order
     {
+        $previousStatus = $order->status;
+
         $order->update([
             'status' => $dto->status,
         ]);
+
+        if ($previousStatus !== Order::STATUS_SHIPPED && $dto->status === Order::STATUS_SHIPPED) {
+            SendOrderShippedNotificationJob::dispatch($order->id);
+        }
 
         return $order->refresh();
     }

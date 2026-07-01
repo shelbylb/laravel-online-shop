@@ -80,7 +80,11 @@ class Order extends Model
 
     public function getPaymentMethodLabelAttribute(): string
     {
-        return self::PAYMENT_METHOD_LABELS[$this->payment_method] ?? $this->payment_method;
+        return match ($this->payment_method) {
+            self::PAYMENT_METHOD_CASH => 'Наличными при получении',
+            self::PAYMENT_METHOD_CARD => 'Оплачено онлайн картой',
+            default => self::PAYMENT_METHOD_LABELS[$this->payment_method] ?? $this->payment_method,
+        };
     }
 
     public function canEditItems(): bool

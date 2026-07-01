@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\DTOs\CheckoutData;
+use App\Jobs\SendOrderCreatedNotificationsJob;
 use App\Models\Address;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -39,6 +40,8 @@ class CheckoutService
             session()->forget('cart_count');
 
             DB::commit();
+
+            SendOrderCreatedNotificationsJob::dispatch($order->id);
 
             return [
                 'success' => true,
