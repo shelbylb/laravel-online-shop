@@ -33,7 +33,9 @@ class OrderData
             status_label: $order->status_label,
             payment_method: $order->payment_method,
             payment_method_label: $order->payment_method_label,
-            payment_status: $order->payment_status ?? 'pending',
+            payment_status: $order->payments->sortByDesc('id')->first()?->status
+                ?? $order->payment_status
+                ?? 'pending',
             recipient_name: $order->recipient_name,
             recipient_phone: $order->recipient_phone,
             shipping_address: $order->shipping_address,

@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Order extends Model
 {
     public const string STATUS_PENDING = 'pending';
+    public const string STATUS_ACCEPTED = 'accepted';
     public const string STATUS_PAID = 'paid';
     public const string STATUS_SHIPPED = 'shipped';
     public const string STATUS_COMPLETED = 'completed';
@@ -16,6 +17,7 @@ class Order extends Model
 
     public const array STATUSES = [
         self::STATUS_PENDING,
+        self::STATUS_ACCEPTED,
         self::STATUS_PAID,
         self::STATUS_SHIPPED,
         self::STATUS_COMPLETED,
@@ -24,6 +26,7 @@ class Order extends Model
 
     public const array STATUS_LABELS = [
         self::STATUS_PENDING => 'Ожидает оплаты',
+        self::STATUS_ACCEPTED => 'Заказ принят',
         self::STATUS_PAID => 'Оплачен',
         self::STATUS_SHIPPED => 'Отправлен',
         self::STATUS_COMPLETED => 'Завершен',
@@ -31,11 +34,16 @@ class Order extends Model
     ];
 
     public const string PAYMENT_METHOD_CASH = 'cash';
-    public const string PAYMENT_METHOD_CARD = 'card';
+    public const string PAYMENT_METHOD_YOOKASSA = 'yookassa';
+
+    public const array PAYMENT_METHODS = [
+        self::PAYMENT_METHOD_CASH,
+        self::PAYMENT_METHOD_YOOKASSA,
+    ];
 
     public const array PAYMENT_METHOD_LABELS = [
         self::PAYMENT_METHOD_CASH => 'Наличными при получении',
-        self::PAYMENT_METHOD_CARD => 'Картой при получении',
+        self::PAYMENT_METHOD_YOOKASSA => 'Картой онлайн',
     ];
 
     protected $fillable = [
@@ -73,6 +81,11 @@ class Order extends Model
         return $this->hasMany(OrderItem::class);
     }
 
+    public function payments(): HasMany
+    {
+        return $this->hasMany(OrderPayment::class);
+    }
+
     public function getStatusLabelAttribute(): string
     {
         return self::STATUS_LABELS[$this->status] ?? $this->status;
@@ -82,7 +95,7 @@ class Order extends Model
     {
         return match ($this->payment_method) {
             self::PAYMENT_METHOD_CASH => 'Наличными при получении',
-            self::PAYMENT_METHOD_CARD => 'Оплачено онлайн картой',
+            self::PAYMENT_METHOD_YOOKASSA => 'Картой онлайн',
             default => self::PAYMENT_METHOD_LABELS[$this->payment_method] ?? $this->payment_method,
         };
     }

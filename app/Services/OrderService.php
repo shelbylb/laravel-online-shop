@@ -6,7 +6,9 @@ use App\DTOs\OrderData;
 use App\Jobs\SendOrderShippedNotificationJob;
 use App\Models\Order;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Pagination\LengthAwarePaginator;
+use RuntimeException;
 
 class OrderService
 {
@@ -17,7 +19,7 @@ class OrderService
     {
         $user = Auth::user();
 
-        $orders = Order::with('items')
+        $orders = Order::with(['items', 'payments'])
             ->where('user_id', $user->id)
             ->orderBy('created_at', 'desc')
             ->paginate($perPage);
@@ -37,7 +39,7 @@ class OrderService
     {
         $user = Auth::user();
 
-        $order = Order::with('items')
+        $order = Order::with(['items', 'payments'])
             ->where('user_id', $user->id)
             ->where('id', $orderId)
             ->first();
@@ -54,7 +56,7 @@ class OrderService
      */
     public function getAllOrders(int $perPage = 20): LengthAwarePaginator
     {
-        $orders = Order::with('user', 'items')
+        $orders = Order::with(['user', 'items', 'payments'])
             ->orderBy('created_at', 'desc')
             ->paginate($perPage);
 
@@ -87,6 +89,34 @@ class OrderService
         return $saved;
     }
 
+    public function markAsPaid(Order $order): Order
+    {
+        return DB::transaction(function () use ($order) {
+            $lockedOrder = Order::query()
+                ->lockForUpdate()
+                ->findOrFail($order->id);
+
+            if (in_array($lockedOrder->status, [
+                Order::STATUS_ACCEPTED,
+                Order::STATUS_PAID,
+                Order::STATUS_SHIPPED,
+                Order::STATUS_COMPLETED,
+            ], true)) {
+                return $lockedOrder;
+            }
+
+            if ($lockedOrder->status === Order::STATUS_CANCELED) {
+                throw new RuntimeException('Нельзя отметить отменённый заказ оплаченным.');
+            }
+
+            $lockedOrder->update([
+                'status' => Order::STATUS_ACCEPTED,
+            ]);
+
+            return $lockedOrder->refresh();
+        });
+    }
+
     /**
      * Отменить заказ (только если статус pending или paid)
      */
@@ -101,7 +131,7 @@ class OrderService
             return ['success' => false, 'message' => 'Заказ не найден'];
         }
 
-        if (!in_array($order->status, [Order::STATUS_PENDING, Order::STATUS_PAID])) {
+        if (!in_array($order->status, [Order::STATUS_PENDING, Order::STATUS_ACCEPTED, Order::STATUS_PAID])) {
             return ['success' => false, 'message' => 'Этот заказ нельзя отменить'];
         }
 

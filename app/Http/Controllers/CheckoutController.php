@@ -3,19 +3,22 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\CheckoutRequest;
+use App\Models\Order;
 use App\Models\Product;
 use App\Services\CheckoutService;
+use App\Services\YooKassaPaymentService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use Illuminate\Http\RedirectResponse;
+use Throwable;
 
 class CheckoutController extends Controller
 {
-    protected CheckoutService $checkoutService;
-
-    public function __construct(CheckoutService $checkoutService)
-    {
-        $this->checkoutService = $checkoutService;
+    public function __construct(
+        protected CheckoutService $checkoutService,
+        private readonly YooKassaPaymentService $paymentService,
+    ) {
     }
 
     /**
@@ -78,7 +81,31 @@ class CheckoutController extends Controller
             return redirect()->back()->with('error', $result['message']);
         }
 
-        return redirect()->route('orders.show', $result['order'])
-            ->with('success', 'Заказ успешно оформлен!');
+        /** @var Order $order */
+        $order = $result['order'];
+
+        if ($order->payment_method === Order::PAYMENT_METHOD_CASH) {
+            return redirect()->route('orders.index')
+                ->with('success', 'Заказ успешно оформлен!');
+        }
+
+        try {
+            $payment = $this->paymentService->createPaymentForOrder($order);
+        } catch (Throwable $exception) {
+            Log::error('Failed to create YooKassa payment', [
+                'order_id' => $order->id,
+                'error' => $exception->getMessage(),
+            ]);
+
+            return redirect()->route('orders.show', $order->id)
+                ->with('error', 'Заказ создан, но не удалось перейти к оплате. Попробуйте ещё раз.');
+        }
+
+        if (!$payment->confirmation_url) {
+            return redirect()->route('orders.show', $order->id)
+                ->with('success', 'Статус оплаты заказа обновлён.');
+        }
+
+        return redirect()->away($payment->confirmation_url);
     }
 }

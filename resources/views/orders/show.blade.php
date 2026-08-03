@@ -51,6 +51,18 @@
                                     <span class="text-muted small">Способ оплаты:</span>
                                     <div>{{ $order->payment_method_label }}</div>
                                 </div>
+                                <div class="mb-3">
+                                    <span class="text-muted small">Статус оплаты:</span>
+                                    <div>
+                                        @if($order->payment_method === 'cash')
+                                            Оплата при получении
+                                        @elseif($order->payment_status === 'succeeded')
+                                            Оплачено
+                                        @else
+                                            Ожидает оплаты
+                                        @endif
+                                    </div>
+                                </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="mb-3">
@@ -96,7 +108,16 @@
 
                         <hr>
 
-                        @if(in_array($order->status, ['pending', 'paid']))
+                        @if($order->payment_method !== 'cash' && $order->payment_status !== 'succeeded' && $order->status === 'pending')
+                            <form method="POST" action="{{ route('orders.pay', $order->id) }}">
+                                @csrf
+                                <button type="submit" class="btn btn-primary w-100">
+                                    Перейти к оплате
+                                </button>
+                            </form>
+                        @endif
+
+                        @if($order->payment_method === 'cash' && in_array($order->status, ['pending', 'paid']))
                             <form method="POST" action="{{ route('orders.cancel', $order->id) }}"
                                   onsubmit="return confirm('Вы уверены, что хотите отменить этот заказ?')">
                                 @csrf

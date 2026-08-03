@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Order;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -23,7 +24,7 @@ class CheckoutRequest extends FormRequest
             'apartment' => ['nullable', 'string', 'max:20'],
             'recipient_name' => ['required', 'string', 'max:255'],
             'recipient_phone' => ['required', 'string', 'regex:/^[\d\s\+\(\)\-]+$/', 'max:20'],
-            'payment_method' => ['required', Rule::in(['card', 'cash'])],
+            'payment_method' => ['required', Rule::in(Order::PAYMENT_METHODS)],
             'set_as_default' => ['boolean'],
             'comment' => ['nullable', 'string', 'max:1000'],
         ];

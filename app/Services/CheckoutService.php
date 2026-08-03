@@ -133,7 +133,9 @@ class CheckoutService
             'order_number' => $orderNumber,
             'total_amount' => $totalAmount,
             'total_quantity' => $totalQuantity,
-            'status' => 'pending',
+            'status' => $data->payment_method === Order::PAYMENT_METHOD_CASH
+                ? Order::STATUS_ACCEPTED
+                : Order::STATUS_PENDING,
             'payment_method' => $data->payment_method,
             'payment_status' => 'pending',
             'recipient_name' => $data->recipient_name,

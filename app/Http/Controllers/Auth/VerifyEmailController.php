@@ -20,14 +20,14 @@ class VerifyEmailController extends Controller
     public function verify(EmailVerificationRequest $request): RedirectResponse
     {
         if ($request->user()->hasVerifiedEmail()) {
-            return redirect()->intended(route('dashboard', absolute: false) . '?verified=1');
+            return redirect()->intended(route('products.index', absolute: false) . '?verified=1');
         }
 
         if ($request->user()->markEmailAsVerified()) {
             SendWelcomeAfterVerificationJob::dispatch($request->user()->id);
         }
 
-        return redirect()->intended(route('dashboard', absolute: false) . '?verified=1');
+        return redirect()->intended(route('products.index', absolute: false) . '?verified=1');
     }
 
     public function send(Request $request): RedirectResponse
@@ -39,7 +39,7 @@ class VerifyEmailController extends Controller
         }
 
         if ($user->hasVerifiedEmail()) {
-            return redirect()->intended(route('dashboard', absolute: false) . '?verified=1');
+            return redirect()->intended(route('products.index', absolute: false) . '?verified=1');
         }
 
         SendRegistrationVerificationJob::dispatch($user->id);

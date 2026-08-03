@@ -10,9 +10,13 @@ use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\YooKassaController;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'layouts.main')->name('main');
+
+Route::post('/payments/yookassa/webhook', [YooKassaController::class, 'webhook'])
+    ->name('payments.yookassa.webhook');
 
 Route::get('/products', [ProductController::class, 'index'])
     ->name('products.index');
@@ -35,16 +39,16 @@ Route::post('/cart/items/{product}/increase', [CartController::class, 'increase'
 Route::post('/cart/items/{product}/decrease', [CartController::class, 'decrease'])->name('cart.items.decrease');
 Route::get('/cart/items/quantities', [CartController::class, 'quantities'])->name('cart.items.quantities');
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
-
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+    Route::post('/orders/{order}/pay', [OrderController::class, 'pay'])
+        ->name('orders.pay');
+    Route::get('/payments/yookassa/return/{order}', [YooKassaController::class, 'return'])
+        ->name('payments.yookassa.return');
     Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus'])
         ->name('orders.status.update');
     Route::get('/orders/{id}', [OrderController::class, 'show'])->name('orders.show');

@@ -33,7 +33,7 @@
                         <th class="text-center">Товаров</th>
                         <th class="text-center">Сумма</th>
                         <th class="text-center">Статус</th>
-                        <th class="text-center">Способ оплаты</th>
+                        <th class="text-center">Оплата</th>
                         <th class="text-center">Действия</th>
                     </tr>
                     </thead>
@@ -60,13 +60,27 @@
                                 </span>
                             </td>
                             <td class="text-center">
-                                <span class="small">{{ $order->payment_method_label }}</span>
+                                @if($order->payment_method === 'cash')
+                                    <span class="badge bg-secondary">Оплата при получении</span>
+                                @elseif($order->payment_status === 'succeeded')
+                                    <span class="badge bg-success">Оплачено</span>
+                                @else
+                                    <span class="badge bg-warning text-dark">Ожидает оплаты</span>
+                                @endif
                             </td>
                             <td class="text-center">
                                 <a href="{{ route('orders.show', $order->id) }}"
                                    class="btn btn-sm btn-outline-primary">
                                     Подробнее
                                 </a>
+                                @if($order->payment_method !== 'cash' && $order->payment_status !== 'succeeded' && $order->status === 'pending')
+                                    <form method="POST" action="{{ route('orders.pay', $order->id) }}" class="d-inline">
+                                        @csrf
+                                        <button type="submit" class="btn btn-sm btn-primary">
+                                            Перейти к оплате
+                                        </button>
+                                    </form>
+                                @endif
                             </td>
                         </tr>
                     @endforeach

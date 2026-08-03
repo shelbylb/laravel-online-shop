@@ -195,10 +195,10 @@
                             <h5 class="card-title mb-3">Способ оплаты</h5>
 
                             <div class="form-check mb-2">
-                                <input class="form-check-input" type="radio" name="payment_method" value="card"
-                                    {{ old('payment_method', 'card') == 'card' ? 'checked' : '' }}>
+                                <input class="form-check-input" type="radio" name="payment_method" value="yookassa"
+                                    {{ old('payment_method', 'yookassa') == 'yookassa' ? 'checked' : '' }}>
                                 <label class="form-check-label">
-                                    <strong>Банковская карта</strong>
+                                    <strong>Онлайн через YooKassa: карта, СБП, SberPay, T-Pay, Alfa Pay</strong>
                                 </label>
                             </div>
 

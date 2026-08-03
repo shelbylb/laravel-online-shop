@@ -6,7 +6,7 @@
 
 <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm">
     <div class="container">
-        <a class="navbar-brand d-flex align-items-center gap-2" href="{{ route('dashboard') }}">
+        <a class="navbar-brand d-flex align-items-center gap-2" href="{{ route('products.index') }}">
             <x-application-logo style="width: 32px; height: 32px;" />
         </a>
 
@@ -17,13 +17,6 @@
 
         <div class="collapse navbar-collapse" id="mainNavbar">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item">
-                    <a class="nav-link @if(request()->routeIs('dashboard')) active fw-semibold @endif"
-                       href="{{ route('dashboard') }}">
-                        Dashboard
-                    </a>
-                </li>
-
                 <li class="nav-item">
                     <a class="nav-link @if(request()->routeIs('products.*')) active fw-semibold @endif"
                        href="{{ route('products.index') }}">
