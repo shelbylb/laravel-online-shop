@@ -14,6 +14,11 @@ class Category extends Model
         return $this->hasMany(Product::class);
     }
 
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
+
     // Простой метод без сложностей
     public static function findBySlug($slug): ?self
     {

@@ -6,6 +6,7 @@ use App\DTOs\User\UserFilterDTO;
 use App\DTOs\User\UserUpsertDTO;
 use App\Models\Role;
 use App\Models\User;
+use App\Jobs\SendRegistrationVerificationJob;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;

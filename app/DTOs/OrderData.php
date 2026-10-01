@@ -2,6 +2,8 @@
 
 namespace App\DTOs;
 
+use App\Models\Order;
+
 class OrderData
 {
     public function __construct(
@@ -22,7 +24,15 @@ class OrderData
         public readonly array $items = []
     ) {}
 
-    public static function fromModel($order): self
+    /**
+     * @return HasMany<OrderPayment, $this>
+     */
+    public function payments(): HasMany
+    {
+        return $this->hasMany(OrderPayment::class);
+    }
+
+    public static function fromModel(Order $order): self
     {
         return new self(
             id: $order->id,

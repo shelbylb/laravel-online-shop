@@ -21,9 +21,13 @@ class ProductService
     /**
      * Возвращает список товаров с контролируемой пагинацией.
      */
-    public function getProducts(ProductFilterDto $dto): LengthAwarePaginator
+    public function getProducts(ProductFilterDto $dto, ?int $categoryId = null): LengthAwarePaginator
     {
         $query = Product::query();
+
+        if ($categoryId !== null) {
+            $query->where('category_id', $categoryId);
+        }
 
         $perPage = in_array($dto->per_page, self::PER_PAGE_OPTIONS, true)
             ? $dto->per_page

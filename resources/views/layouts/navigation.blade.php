@@ -17,11 +17,40 @@
 
         <div class="collapse navbar-collapse" id="mainNavbar">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item">
-                    <a class="nav-link @if(request()->routeIs('products.*')) active fw-semibold @endif"
-                       href="{{ route('products.index') }}">
-                        Каталог
-                    </a>
+                <li class="nav-item dropdown catalog-dropdown">
+                    <div class="d-flex align-items-center">
+                        <a class="nav-link pe-1 @if(request()->routeIs('products.*', 'categories.show')) active fw-semibold @endif"
+                           href="{{ route('products.index') }}">
+                            Каталог
+                        </a>
+
+                        <button class="nav-link dropdown-toggle dropdown-toggle-split border-0 bg-transparent px-1"
+                                type="button"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false"
+                                aria-label="Открыть категории каталога">
+                            <span class="visually-hidden">Категории</span>
+                        </button>
+                    </div>
+
+                    <ul class="dropdown-menu catalog-dropdown-menu">
+                        <li>
+                            <a class="dropdown-item @if(request()->routeIs('products.index')) active @endif"
+                               href="{{ route('products.index') }}">
+                                Все товары
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+
+                        @foreach($catalogCategories as $catalogCategory)
+                            <li>
+                                <a class="dropdown-item @if(request()->routeIs('categories.show') && request()->route('category')?->is($catalogCategory)) active @endif"
+                                   href="{{ route('categories.show', $catalogCategory) }}">
+                                    {{ $catalogCategory->name }}
+                                </a>
+                            </li>
+                        @endforeach
+                    </ul>
                 </li>
 
                 @auth

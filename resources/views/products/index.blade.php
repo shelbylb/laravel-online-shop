@@ -5,6 +5,7 @@
 @php($inStock = $dto->in_stock ?? false)
 @php($sort = $dto->sort ?? 'new')
 @php($maxProductPricePlaceholder = $maxPrice ? ('до ' . $maxPrice) : 'максимальная цена товара')
+@php($catalogRoute = isset($category) ? route('categories.show', $category) : route('products.index'))
 
 @extends('layouts.app')
 
@@ -88,7 +89,9 @@
     </style>
 
     <div class="container py-4">
-        <h1 class="h3 mb-3">Каталог товаров</h1>
+        <h1 class="h3 mb-3">
+            {{ isset($category) ? $category->name : 'Каталог товаров' }}
+        </h1>
 
         @if($errors->any())
             <div class="alert alert-danger">
@@ -98,7 +101,7 @@
 
         <div id="notification-container" class="position-fixed top-0 end-0 p-3" style="z-index: 1050;"></div>
 
-        <form method="GET" action="{{ route('products.index') }}" class="card card-body mb-3">
+        <form method="GET" action="{{ $catalogRoute }}" class="card card-body mb-3">
             <div class="row g-2 align-items-end">
                 <div class="col-12 col-lg-4">
                     <label for="q" class="form-label mb-1">Поиск</label>
@@ -170,7 +173,7 @@
 
                 <div class="col-12 col-lg-8 mt-2 d-flex justify-content-end gap-2">
                     <button type="submit" class="btn btn-primary">Применить</button>
-                    <a href="{{ route('products.index', ['per_page' => $perPage]) }}"
+                    <a href="{{ $catalogRoute }}?per_page={{ $perPage }}"
                        class="btn btn-outline-secondary">
                         Сбросить
                     </a>

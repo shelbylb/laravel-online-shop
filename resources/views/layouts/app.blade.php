@@ -21,6 +21,22 @@
         .page-wrapper {
             min-height: 100vh;
         }
+
+        @media (min-width: 992px) {
+            .catalog-dropdown:hover > .dropdown-menu,
+            .catalog-dropdown:focus-within > .dropdown-menu {
+                display: block;
+                margin-top: 0;
+            }
+        }
+
+        .catalog-dropdown-menu {
+            min-width: 13rem;
+        }
+
+        .catalog-dropdown-menu .dropdown-item {
+            padding-block: 0.5rem;
+        }
     </style>
 </head>
 <body>

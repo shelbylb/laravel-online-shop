@@ -6,7 +6,6 @@ use App\DTOs\ProductFilterDto;
 use App\Http\Requests\ProductFilterRequest;
 use App\Models\Category;
 use App\Services\ProductService;
-use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
@@ -29,14 +28,15 @@ class CategoryController extends Controller
     {
         $dto = ProductFilterDto::fromRequest($request);
 
-        $products = $this
-            ->productService
-            ->getProductsByCategoryId($category->id, $dto);
+        $products = $this->productService->getProducts($dto, $category->id);
+
+        $maxPrice = $this->productService->getMaxProductPrice();
 
         return view('products.index', [
             'products' => $products,
             'category' => $category,
             'dto'      => $dto,
+            'maxPrice' => $maxPrice,
         ]);
     }
 }
