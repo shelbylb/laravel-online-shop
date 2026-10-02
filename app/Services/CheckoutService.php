@@ -53,7 +53,7 @@ class CheckoutService
             DB::rollBack();
             Log::error('Order creation failed: ' . $e->getMessage(), [
                 'user_id' => auth()->id(),
-                'data' => $validatedData ?? []
+                'data' => $validatedData
             ]);
 
             return [
@@ -66,7 +66,7 @@ class CheckoutService
     private function getDeliveryAddress($user, CheckoutData $data): ?Address
     {
         // Если address_id есть и это не пустая строка, ищем существующий адрес
-        if (!empty($data->address_id) && is_numeric($data->address_id)) {
+        if ($data->address_id !== null) {
             return Address::where('id', $data->address_id)
                 ->where('user_id', $user->id)
                 ->first();
@@ -81,7 +81,7 @@ class CheckoutService
             'street' => $data->street,
             'house' => $data->house,
             'apartment' => $data->apartment,
-            'is_default' => $data->set_as_default ?? false,
+            'is_default' => $data->set_as_default,
         ]);
 
         return $address;

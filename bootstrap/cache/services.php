@@ -34,8 +34,7 @@
     30 => 'Spatie\\LaravelData\\LaravelDataServiceProvider',
     31 => 'Spatie\\StructureDiscoverer\\StructureDiscovererServiceProvider',
     32 => 'VladimirYuldashev\\LaravelQueueRabbitMQ\\LaravelQueueRabbitMQServiceProvider',
-    33 => 'App\\Providers\\EventServiceProvider',
-    34 => 'App\\Providers\\AppServiceProvider',
+    33 => 'App\\Providers\\AppServiceProvider',
   ),
   'eager' => 
   array (
@@ -56,8 +55,7 @@
     14 => 'Spatie\\LaravelData\\LaravelDataServiceProvider',
     15 => 'Spatie\\StructureDiscoverer\\StructureDiscovererServiceProvider',
     16 => 'VladimirYuldashev\\LaravelQueueRabbitMQ\\LaravelQueueRabbitMQServiceProvider',
-    17 => 'App\\Providers\\EventServiceProvider',
-    18 => 'App\\Providers\\AppServiceProvider',
+    17 => 'App\\Providers\\AppServiceProvider',
   ),
   'deferred' => 
   array (

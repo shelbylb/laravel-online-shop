@@ -66,6 +66,9 @@ class Order extends Model
         'total_quantity' => 'integer',
     ];
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
@@ -76,11 +79,17 @@ class Order extends Model
         return $this->belongsTo(Address::class);
     }
 
+    /**
+     * @return HasMany<OrderItem, $this>
+     */
     public function items(): HasMany
     {
         return $this->hasMany(OrderItem::class);
     }
 
+    /**
+     * @return HasMany<OrderPayment, $this>
+     */
     public function payments(): HasMany
     {
         return $this->hasMany(OrderPayment::class);
@@ -88,7 +97,7 @@ class Order extends Model
 
     public function getStatusLabelAttribute(): string
     {
-        return self::STATUS_LABELS[$this->status] ?? $this->status;
+        return self::STATUS_LABELS[$this->status];
     }
 
     public function getPaymentMethodLabelAttribute(): string

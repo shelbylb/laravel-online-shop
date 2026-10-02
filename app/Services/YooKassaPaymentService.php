@@ -49,7 +49,7 @@ class YooKassaPaymentService
             return $existingPayment;
         }
 
-        $idempotenceKey = $existingPayment?->idempotence_key ?? (string) Str::uuid();
+        $idempotenceKey = $existingPayment->idempotence_key ?? (string) Str::uuid();
         $requestPayload = $this->buildPaymentPayload($order);
 
         $localPayment = $existingPayment ?? $order->payments()->create([

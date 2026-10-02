@@ -6,6 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int $id
+ * @property int $order_id
+ * @property string $provider
+ * @property string $status
+ * @property string|null $external_payment_id
+ */
+
 class OrderPayment extends Model
 {
     public const string PROVIDER_YOOKASSA = 'yookassa';
@@ -14,6 +22,8 @@ class OrderPayment extends Model
     public const string STATUS_WAITING_FOR_CAPTURE = 'waiting_for_capture';
     public const string STATUS_SUCCEEDED = 'succeeded';
     public const string STATUS_CANCELED = 'canceled';
+
+
 
     public const array STATUSES = [
         self::STATUS_PENDING,
@@ -46,11 +56,17 @@ class OrderPayment extends Model
         'canceled_at' => 'datetime',
     ];
 
+    /**
+     * @return BelongsTo<Order, $this>
+     */
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
     }
 
+    /**
+     * @return HasMany<PaymentReceipt, $this>
+     */
     public function receipts(): HasMany
     {
         return $this->hasMany(PaymentReceipt::class);

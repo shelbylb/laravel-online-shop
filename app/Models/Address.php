@@ -13,7 +13,7 @@ class Address extends Model
     /**
      * Поля, разрешенные для массового присвоения
      *
-     * @var array
+     * @var list<string>
      */
     protected $fillable = [
         'user_id',
@@ -28,7 +28,7 @@ class Address extends Model
     /**
      * Поля, которые должны быть преобразованы к определенным типам
      *
-     * @var array
+     * @var array<string, string>
      */
     protected $casts = [
         'is_default' => 'boolean',
@@ -40,7 +40,7 @@ class Address extends Model
     /**
      * Атрибуты, которые нужно скрыть из JSON
      *
-     * @var array
+     * @var list<string>
      */
     protected $hidden = [
         'deleted_at'

@@ -3,6 +3,7 @@
 namespace App\DTOs;
 
 use App\Models\Order;
+use App\Models\OrderPayment;
 
 class OrderData
 {
@@ -24,16 +25,14 @@ class OrderData
         public readonly array $items = []
     ) {}
 
-    /**
-     * @return HasMany<OrderPayment, $this>
-     */
-    public function payments(): HasMany
+    public static function fromModel(Order $order, array $items = []): self
     {
-        return $this->hasMany(OrderPayment::class);
-    }
+        $payments = $order->payments->sortByDesc('id');
 
-    public static function fromModel(Order $order): self
-    {
+        $latestPaymentStatus = $payments->isEmpty()
+            ? null
+            : $payments->first()->status;
+
         return new self(
             id: $order->id,
             order_number: $order->order_number,
@@ -43,15 +42,15 @@ class OrderData
             status_label: $order->status_label,
             payment_method: $order->payment_method,
             payment_method_label: $order->payment_method_label,
-            payment_status: $order->payments->sortByDesc('id')->first()?->status
-                ?? $order->payment_status
-                ?? 'pending',
+            payment_status: $latestPaymentStatus
+            ?? $order->payment_status
+            ?? OrderPayment::STATUS_PENDING,
             recipient_name: $order->recipient_name,
             recipient_phone: $order->recipient_phone,
             shipping_address: $order->shipping_address,
             comment: $order->comment,
             created_at: $order->created_at->format('d.m.Y H:i'),
-            items: []
+            items: $items,
         );
     }
 

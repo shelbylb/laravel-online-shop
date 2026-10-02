@@ -34,7 +34,7 @@ class SessionCartService
 
     private function putRaw(array $raw): void
     {
-        session()?->put(self::SESSION_KEY, $raw);
+        session()->put(self::SESSION_KEY, $raw);
     }
 
     public function getItems(): array

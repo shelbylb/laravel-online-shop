@@ -18,9 +18,6 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => \App\Http\Middleware\CheckRole::class,
         ]);
     })
-    ->withProviders([
-        App\Providers\EventServiceProvider::class,
-    ])
     ->withExceptions(function (Exceptions $exceptions): void {
         //
     })->create();
