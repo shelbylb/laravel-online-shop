@@ -90,7 +90,6 @@ class SessionCartService
         $quantity = max(1, $quantity);
 
         $raw = $this->getRaw();
-        $productId = $product->id;
         $current = (int) ($raw[$product->id] ?? 0);
         $next = $current + $quantity;
 
