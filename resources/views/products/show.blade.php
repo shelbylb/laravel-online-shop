@@ -3,7 +3,8 @@
 @section('title', $product->name)
 
 @section('content')
-    <div class="container py-4">
+    <div class="container py-4"
+         data-cart-quantities-url="{{ route('cart.items.quantities') }}">
         <div class="row g-4">
             <div class="col-md-5">
                 @if($product->image)
@@ -34,9 +35,12 @@
                     <p class="mb-0">{{ $product->description ?? 'Описание пока не добавлено.' }}</p>
                 </div>
 
-                <div class="d-flex gap-2">
-                    <button type="button" class="btn btn-primary" disabled>Добавить в корзину</button>
-                    <a href="{{ route('products.index') }}" class="btn btn-outline-secondary">Назад в каталог</a>
+                <div class="d-flex gap-2 align-items-start">
+                    <x-cart-controls :product="$product" />
+
+                    <a href="{{ route('products.index') }}" class="btn btn-outline-secondary">
+                        Назад в каталог
+                    </a>
                 </div>
             </div>
         </div>
