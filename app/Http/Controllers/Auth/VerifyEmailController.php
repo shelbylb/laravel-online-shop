@@ -9,6 +9,7 @@ use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Illuminate\Auth\Events\Verified;
 
 class VerifyEmailController extends Controller
 {
@@ -19,12 +20,15 @@ class VerifyEmailController extends Controller
 
     public function verify(EmailVerificationRequest $request): RedirectResponse
     {
-        if ($request->user()->hasVerifiedEmail()) {
+        $user = $request->user();
+
+        if ($user->hasVerifiedEmail()) {
             return redirect()->intended(route('products.index', absolute: false) . '?verified=1');
         }
 
-        if ($request->user()->markEmailAsVerified()) {
-            SendWelcomeAfterVerificationJob::dispatch($request->user()->id);
+        if ($user->markEmailAsVerified()) {
+            event(new Verified($user));
+            SendWelcomeAfterVerificationJob::dispatch($user->id);
         }
 
         return redirect()->intended(route('products.index', absolute: false) . '?verified=1');
