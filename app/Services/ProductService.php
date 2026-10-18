@@ -7,6 +7,7 @@ namespace App\Services;
 use App\DTOs\ProductFilterDto;
 use App\Models\Product;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Cache;
 
 class ProductService
 {
@@ -118,7 +119,9 @@ class ProductService
 
     public function getMaxProductPrice(): int
     {
-        return (int) (Product::query()->max('price') ?? 0);
+        return(int) Cache::remember('products.max_price', 300, function () {
+            return (int) (Product::query()->max('price') ?? 0);
+        });
     }
 }
 

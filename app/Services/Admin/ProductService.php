@@ -11,6 +11,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Cache;
 
 class ProductService
 {
@@ -51,7 +52,11 @@ class ProductService
             $data['image'] = $dto->image->store('products', 'public');
         }
 
-        return Product::query()->create($data);
+        $newProduct = Product::query()->create($data);
+
+        Cache::forget('products.max_price');
+
+        return $newProduct;
     }
 
     public function update(Product $product, ProductDto $dto): Product
@@ -68,6 +73,8 @@ class ProductService
 
         $product->update($data);
 
+        Cache::forget('products.max_price');
+
         return $product->refresh();
     }
 
@@ -78,5 +85,7 @@ class ProductService
         }
 
         $product->delete();
+
+        Cache::forget('products.max_price');
     }
 }
