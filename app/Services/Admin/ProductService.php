@@ -56,6 +56,9 @@ class ProductService
 
         Cache::forget('products.max_price');
 
+        Cache::add('products.catalog.version', 1);
+        Cache::increment('products.catalog.version');
+
         return $newProduct;
     }
 
@@ -75,6 +78,9 @@ class ProductService
 
         Cache::forget('products.max_price');
 
+        Cache::add('products.catalog.version', 1);
+        Cache::increment('products.catalog.version');
+
         return $product->refresh();
     }
 
@@ -87,5 +93,8 @@ class ProductService
         $product->delete();
 
         Cache::forget('products.max_price');
+
+        Cache::add('products.catalog.version', 1);
+        Cache::increment('products.catalog.version');
     }
 }

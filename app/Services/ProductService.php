@@ -34,6 +34,21 @@ class ProductService
             ? $dto->per_page
             : 10;
 
+        Cache::add('products.catalog.version', 1);
+
+        $version = (int) Cache::get('products.catalog.version');
+
+        $cacheKey = 'products.catalog.v' . $version . '.' . md5(json_encode([
+                'category_id' => $categoryId,
+                'sort' => $dto->sort,
+                'page' => request()->integer('page', 1),
+                'q' => $dto->q,
+                'min_price' => $dto->min_price,
+                'max_price' => $dto->max_price,
+                'in_stock' => $dto->in_stock,
+                'per_page' => $perPage,
+            ]));
+
 
         /**
          * 1) Поиск (базовый)
@@ -114,7 +129,9 @@ class ProductService
          * 5) Пагинация + сохранение query string
          * withQueryString() — чтобы при переключении страниц фильтры НЕ сбрасывались.
          */
-        return $query->paginate($perPage)->withQueryString();
+        return Cache::remember($cacheKey, 300, function () use ($query, $perPage) {
+            return $query->paginate($perPage)->withQueryString();
+        });
     }
 
     public function getMaxProductPrice(): int
